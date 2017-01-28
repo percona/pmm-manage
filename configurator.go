@@ -10,6 +10,8 @@ import (
 )
 
 var pathPrefix string
+var sshKeyPath string
+var sshKeyOwner string
 var htpasswdFile string
 var listenAddress string
 
@@ -17,6 +19,8 @@ func main() {
 	parseFlag()
 
 	router := mux.NewRouter().PathPrefix(pathPrefix).Subrouter()
+	router.HandleFunc("/v1/sshkey", getSSHKeyHandler).Methods("GET")
+	router.HandleFunc("/v1/sshkey", setSSHKeyHandler).Methods("POST")
 	router.HandleFunc("/v1/users", getUserListHandler).Methods("GET")
 	router.HandleFunc("/v1/users", createUserHandler).Methods("POST")
 	router.HandleFunc("/v1/users/{username}", createUserHandler).Methods("PATCH")
@@ -46,7 +50,21 @@ func parseFlag() {
 		"/configurator",
 		"Prefix for the internal routes of web endpoints",
 	)
+	flag.StringVar(
+		&sshKeyPath,
+		"ssh-key-path",
+		"",
+		"Path for SSH key",
+	)
+	flag.StringVar(
+		&sshKeyOwner,
+		"ssh-key-owner",
+		"admin",
+		"Owner of SSH key",
+	)
 	flag.Parse()
+
+	runSSHKeyChecks()
 }
 
 func returnSuccess(w http.ResponseWriter) {
