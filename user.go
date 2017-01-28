@@ -20,7 +20,7 @@ func readUsers() {
 	}
 }
 
-func returnUser(w http.ResponseWriter, username string) {
+func returnUser(w http.ResponseWriter, req *http.Request, username string) {
 	readUsers()
 
 	for _, item := range users {
@@ -29,7 +29,7 @@ func returnUser(w http.ResponseWriter, username string) {
 			return
 		}
 	}
-	returnError(w, http.StatusNotFound, "User is not found", nil)
+	returnError(w, req, http.StatusNotFound, "User is not found", nil)
 }
 
 func getUserListHandler(w http.ResponseWriter, req *http.Request) {
@@ -39,36 +39,36 @@ func getUserListHandler(w http.ResponseWriter, req *http.Request) {
 
 func getUserHandler(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
-	returnUser(w, params["username"])
+	returnUser(w, req, params["username"])
 }
 
 func createUserHandler(w http.ResponseWriter, req *http.Request) {
 	var newUser user
 	if err := json.NewDecoder(req.Body).Decode(&newUser); err != nil {
-		returnError(w, http.StatusBadRequest, "Cannot parse json", err)
+		returnError(w, req, http.StatusBadRequest, "Cannot parse json", err)
 		return
 	}
 
 	if strings.ContainsAny(newUser.Username, ":") || len(newUser.Username) >= 255 {
-		returnError(w, http.StatusForbidden, "Usernames are limited to 255 bytes and may not include the character :.", nil)
+		returnError(w, req, http.StatusForbidden, "Usernames are limited to 255 bytes and may not include the character :.", nil)
 		return
 	}
 
 	if err := htpasswd.SetPassword(htpasswdFile, newUser.Username, newUser.Password, htpasswd.HashBCrypt); err != nil {
-		returnError(w, http.StatusInternalServerError, "Cannot set password", err)
+		returnError(w, req, http.StatusInternalServerError, "Cannot set password", err)
 		return
 	}
 
 	location := fmt.Sprintf("http://%s%s/%s", req.Host, req.URL.String(), newUser.Username)
 	w.Header().Set("Location", location)
 	w.WriteHeader(http.StatusCreated)
-	returnUser(w, newUser.Username)
+	returnUser(w, req, newUser.Username)
 }
 
 func deletePersonEndpoint(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	if err := htpasswd.RemoveUser(htpasswdFile, params["username"]); err != nil {
-		returnError(w, http.StatusInternalServerError, "Cannot remove the user", err)
+		returnError(w, req, http.StatusInternalServerError, "Cannot remove the user", err)
 		return
 	}
 	returnSuccess(w)
