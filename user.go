@@ -9,19 +9,18 @@ import (
 	"strings"
 )
 
-var users []user
-
-func readUsers() {
-	users = users[:0]
+func readUsers() []htuser {
+	var users []htuser
 	if userMap, err := htpasswd.ParseHtpasswdFile(htpasswdFile); err == nil {
 		for username := range userMap {
-			users = append(users, user{Username: username, Password: "********"})
+			users = append(users, htuser{Username: username, Password: "********"})
 		}
 	}
+	return users
 }
 
 func returnUser(w http.ResponseWriter, req *http.Request, username string) {
-	readUsers()
+	users := readUsers()
 
 	for _, item := range users {
 		if item.Username == username {
@@ -33,7 +32,7 @@ func returnUser(w http.ResponseWriter, req *http.Request, username string) {
 }
 
 func getUserListHandler(w http.ResponseWriter, req *http.Request) {
-	readUsers()
+	users := readUsers()
 	json.NewEncoder(w).Encode(users)
 }
 
@@ -43,7 +42,7 @@ func getUserHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func createUserHandler(w http.ResponseWriter, req *http.Request) {
-	var newUser user
+	var newUser htuser
 	if err := json.NewDecoder(req.Body).Decode(&newUser); err != nil {
 		returnError(w, req, http.StatusBadRequest, "Cannot parse json", err)
 		return

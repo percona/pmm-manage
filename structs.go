@@ -1,6 +1,6 @@
 package main
 
-type user struct {
+type htuser struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
