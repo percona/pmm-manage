@@ -9,9 +9,9 @@ import (
 	"net/http"
 )
 
+var pathPrefix string
 var htpasswdFile string
 var listenAddress string
-var pathPrefix string
 
 func main() {
 	parseFlag()
@@ -22,6 +22,8 @@ func main() {
 	router.HandleFunc("/v1/users/{username}", createUserHandler).Methods("PATCH")
 	router.HandleFunc("/v1/users/{username}", getUserHandler).Methods("GET")
 	router.HandleFunc("/v1/users/{username}", deletePersonEndpoint).Methods("DELETE")
+
+	log.Printf("PMM Configurator is started on %s address", listenAddress)
 	log.Fatal(http.ListenAndServe(listenAddress, router))
 }
 
