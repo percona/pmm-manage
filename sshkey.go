@@ -20,7 +20,7 @@ func runSSHKeyChecks() {
 		log.Fatal(err)
 	}
 	if sshKeyPath == "" {
-		sshKeyPath = sshKeyUser.HomeDir + ".ssh/authorized_keys"
+		sshKeyPath = sshKeyUser.HomeDir + "/.ssh/authorized_keys"
 	}
 
 	sshKeyDir := filepath.Dir(sshKeyPath)
