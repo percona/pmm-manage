@@ -48,8 +48,13 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if strings.ContainsAny(newUser.Username, ":") || len(newUser.Username) >= 255 {
-		returnError(w, req, http.StatusForbidden, "Usernames are limited to 255 bytes and may not include the character :.", nil)
+	if strings.ContainsAny(newUser.Username, ":") || len(newUser.Username) == 0 || len(newUser.Username) > 255 {
+		returnError(w, req, http.StatusForbidden, "Usernames are limited to 255 bytes and may not include the colon symbol", nil)
+		return
+	}
+
+	if len(newUser.Password) == 0 || len(newUser.Password) > 255 {
+		returnError(w, req, http.StatusForbidden, "Passwords are limited to 255 bytes", nil)
 		return
 	}
 
