@@ -58,7 +58,8 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := htpasswd.SetPassword(htpasswdFile, newUser.Username, newUser.Password, htpasswd.HashBCrypt); err != nil {
+	// htpasswd.HashBCrypt is better, but nginx server in CentOS 7, doesn't support it :(
+	if err := htpasswd.SetPassword(htpasswdFile, newUser.Username, newUser.Password, htpasswd.HashSHA); err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot set password", err)
 		return
 	}
