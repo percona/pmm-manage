@@ -64,7 +64,7 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 	returnUser(w, req, newUser.Username)
 }
 
-func deletePersonEndpoint(w http.ResponseWriter, req *http.Request) {
+func deleteUserHandler(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	if err := htpasswd.RemoveUser(htpasswdFile, params["username"]); err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot remove the user", err)
