@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/user"
+	"path"
 	"path/filepath"
 	"strconv"
 )
@@ -20,7 +21,7 @@ func runSSHKeyChecks() {
 		log.Fatal(err)
 	}
 	if sshKeyPath == "" {
-		sshKeyPath = sshKeyUser.HomeDir + "/.ssh/authorized_keys"
+		sshKeyPath = path.Join(sshKeyUser.HomeDir, ".ssh/authorized_keys")
 	}
 
 	sshKeyDir := filepath.Dir(sshKeyPath)
