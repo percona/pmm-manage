@@ -48,12 +48,18 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if strings.ContainsAny(newUser.Username, ":") || len(newUser.Username) >= 255 {
-		returnError(w, req, http.StatusForbidden, "Usernames are limited to 255 bytes and may not include the character :.", nil)
+	if strings.ContainsAny(newUser.Username, ":") || len(newUser.Username) == 0 || len(newUser.Username) > 255 {
+		returnError(w, req, http.StatusForbidden, "Usernames are limited to 255 bytes and may not include the colon symbol", nil)
 		return
 	}
 
-	if err := htpasswd.SetPassword(htpasswdFile, newUser.Username, newUser.Password, htpasswd.HashBCrypt); err != nil {
+	if len(newUser.Password) == 0 || len(newUser.Password) > 255 {
+		returnError(w, req, http.StatusForbidden, "Passwords are limited to 255 bytes", nil)
+		return
+	}
+
+	// htpasswd.HashBCrypt is better, but nginx server in CentOS 7, doesn't support it :(
+	if err := htpasswd.SetPassword(htpasswdFile, newUser.Username, newUser.Password, htpasswd.HashSHA); err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot set password", err)
 		return
 	}
@@ -64,7 +70,7 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 	returnUser(w, req, newUser.Username)
 }
 
-func deletePersonEndpoint(w http.ResponseWriter, req *http.Request) {
+func deleteUserHandler(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	if err := htpasswd.RemoveUser(htpasswdFile, params["username"]); err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot remove the user", err)
