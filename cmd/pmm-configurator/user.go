@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func readUsers() []htuser {
+func readHTTPUsers() []htuser {
 	var users []htuser
 	if userMap, err := htpasswd.ParseHtpasswdFile(htpasswdPath); err == nil {
 		for username := range userMap {
@@ -20,7 +20,7 @@ func readUsers() []htuser {
 }
 
 func returnUser(w http.ResponseWriter, req *http.Request, username string) {
-	users := readUsers()
+	users := readHTTPUsers()
 
 	for _, item := range users {
 		if item.Username == username {
@@ -32,7 +32,7 @@ func returnUser(w http.ResponseWriter, req *http.Request, username string) {
 }
 
 func getUserListHandler(w http.ResponseWriter, req *http.Request) {
-	users := readUsers()
+	users := readHTTPUsers()
 	json.NewEncoder(w).Encode(users)
 }
 
@@ -58,9 +58,8 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// htpasswd.HashBCrypt is better, but nginx server in CentOS 7, doesn't support it :(
-	if err := htpasswd.SetPassword(htpasswdPath, newUser.Username, newUser.Password, htpasswd.HashSHA); err != nil {
-		returnError(w, req, http.StatusInternalServerError, "Cannot set password", err)
+	if err := createHTTPUser(newUser); err != nil {
+		returnError(w, req, http.StatusInternalServerError, "Cannot set http password", err)
 		return
 	}
 
@@ -70,11 +69,20 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 	returnUser(w, req, newUser.Username)
 }
 
+func createHTTPUser(newUser htuser) error {
+	// htpasswd.HashBCrypt is better, but nginx server in CentOS 7, doesn't support it :(
+	return htpasswd.SetPassword(htpasswdPath, newUser.Username, newUser.Password, htpasswd.HashSHA)
+}
+
 func deleteUserHandler(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
-	if err := htpasswd.RemoveUser(htpasswdPath, params["username"]); err != nil {
-		returnError(w, req, http.StatusInternalServerError, "Cannot remove the user", err)
+	if err := deleteHTTPUser(params["username"]); err != nil {
+		returnError(w, req, http.StatusInternalServerError, "Cannot remove http user", err)
 		return
 	}
 	returnSuccess(w)
+}
+
+func deleteHTTPUser(username string) error {
+	return htpasswd.RemoveUser(htpasswdPath, username)
 }
