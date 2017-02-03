@@ -47,6 +47,11 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if err := createGrafanaUser(newUser); err != nil {
+		returnError(w, req, http.StatusInternalServerError, "Cannot set grafana password", err)
+		return
+	}
+
 	if err := createHTTPUser(newUser); err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot set http password", err)
 		return
@@ -60,6 +65,10 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 
 func deleteUserHandler(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
+	if err := deleteGrafanaUser(params["username"]); err != nil {
+		returnError(w, req, http.StatusInternalServerError, "Cannot remove grafana user", err)
+		return
+	}
 	if err := deleteHTTPUser(params["username"]); err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot remove http user", err)
 		return

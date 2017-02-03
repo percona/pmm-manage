@@ -13,6 +13,7 @@ var pathPrefix string
 var sshKeyPath string
 var sshKeyOwner string
 var htpasswdPath string
+var grafanaDBPath string
 var listenAddress string
 
 func main() {
@@ -63,6 +64,12 @@ func parseFlag() {
 		"ssh-key-owner",
 		"admin",
 		"Owner of SSH key",
+	)
+	flag.StringVar(
+		&grafanaDBPath,
+		"grafana-db-path",
+		"/srv/grafana/grafana.db",
+		"grafana database location",
 	)
 	flag.Parse()
 
