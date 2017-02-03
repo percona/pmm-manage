@@ -3,21 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/foomo/htpasswd"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strings"
 )
-
-func readHTTPUsers() []htuser {
-	var users []htuser
-	if userMap, err := htpasswd.ParseHtpasswdFile(htpasswdPath); err == nil {
-		for username := range userMap {
-			users = append(users, htuser{Username: username, Password: "********"})
-		}
-	}
-	return users
-}
 
 func returnUser(w http.ResponseWriter, req *http.Request, username string) {
 	users := readHTTPUsers()
@@ -69,11 +58,6 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 	returnUser(w, req, newUser.Username)
 }
 
-func createHTTPUser(newUser htuser) error {
-	// htpasswd.HashBCrypt is better, but nginx server in CentOS 7, doesn't support it :(
-	return htpasswd.SetPassword(htpasswdPath, newUser.Username, newUser.Password, htpasswd.HashSHA)
-}
-
 func deleteUserHandler(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	if err := deleteHTTPUser(params["username"]); err != nil {
@@ -81,8 +65,4 @@ func deleteUserHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	returnSuccess(w)
-}
-
-func deleteHTTPUser(username string) error {
-	return htpasswd.RemoveUser(htpasswdPath, username)
 }
