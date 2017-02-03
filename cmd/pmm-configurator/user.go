@@ -11,7 +11,7 @@ import (
 
 func readUsers() []htuser {
 	var users []htuser
-	if userMap, err := htpasswd.ParseHtpasswdFile(htpasswdFile); err == nil {
+	if userMap, err := htpasswd.ParseHtpasswdFile(htpasswdPath); err == nil {
 		for username := range userMap {
 			users = append(users, htuser{Username: username, Password: "********"})
 		}
@@ -59,7 +59,7 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// htpasswd.HashBCrypt is better, but nginx server in CentOS 7, doesn't support it :(
-	if err := htpasswd.SetPassword(htpasswdFile, newUser.Username, newUser.Password, htpasswd.HashSHA); err != nil {
+	if err := htpasswd.SetPassword(htpasswdPath, newUser.Username, newUser.Password, htpasswd.HashSHA); err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot set password", err)
 		return
 	}
@@ -72,7 +72,7 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 
 func deleteUserHandler(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
-	if err := htpasswd.RemoveUser(htpasswdFile, params["username"]); err != nil {
+	if err := htpasswd.RemoveUser(htpasswdPath, params["username"]); err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot remove the user", err)
 		return
 	}

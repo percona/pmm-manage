@@ -12,7 +12,7 @@ import (
 var pathPrefix string
 var sshKeyPath string
 var sshKeyOwner string
-var htpasswdFile string
+var htpasswdPath string
 var listenAddress string
 
 func main() {
@@ -35,8 +35,8 @@ func main() {
 
 func parseFlag() {
 	flag.StringVar(
-		&htpasswdFile,
-		"htpasswd",
+		&htpasswdPath,
+		"htpasswd-path",
 		"/srv/nginx/.htpasswd",
 		"htpasswd file location",
 	)
