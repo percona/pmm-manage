@@ -52,6 +52,11 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if err := replacePrometheusUser(newUser); err != nil {
+		returnError(w, req, http.StatusInternalServerError, "Cannot set prometheus password", err)
+		return
+	}
+
 	if err := createHTTPUser(newUser); err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot set http password", err)
 		return

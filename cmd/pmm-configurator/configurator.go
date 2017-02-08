@@ -15,6 +15,7 @@ var sshKeyOwner string
 var htpasswdPath string
 var grafanaDBPath string
 var listenAddress string
+var prometheusConfPath string
 
 func main() {
 	parseFlag()
@@ -70,6 +71,12 @@ func parseFlag() {
 		"grafana-db-path",
 		"/srv/grafana/grafana.db",
 		"grafana database location",
+	)
+	flag.StringVar(
+		&prometheusConfPath,
+		"prometheus-conf-path",
+		"/etc/prometheus.yml",
+		"prometheus configuration file location",
 	)
 	flag.Parse()
 
