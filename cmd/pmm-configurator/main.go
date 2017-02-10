@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"github.com/gorilla/mux"
-	"io"
 	"log"
 	"net/http"
 )
@@ -103,6 +102,5 @@ func returnError(w http.ResponseWriter, req *http.Request, httpStatus int, title
 	responceJSON, _ := json.Marshal(responce)
 	log.Printf("%s %s: %s", req.Method, req.URL.String(), responceJSON)
 
-	w.WriteHeader(httpStatus)
-	io.WriteString(w, string(responceJSON)+"\n")
+	http.Error(w, string(responceJSON)+"\n", httpStatus)
 }
