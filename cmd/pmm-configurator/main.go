@@ -12,6 +12,7 @@ var pathPrefix string
 var sshKeyPath string
 var sshKeyOwner string
 var htpasswdPath string
+var updateDirPath string
 var grafanaDBPath string
 var listenAddress string
 var prometheusConfPath string
@@ -22,6 +23,12 @@ func main() {
 	router := mux.NewRouter().PathPrefix(pathPrefix).Subrouter()
 	router.HandleFunc("/v1/sshkey", getSSHKeyHandler).Methods("GET")
 	router.HandleFunc("/v1/sshkey", setSSHKeyHandler).Methods("POST")
+
+	router.HandleFunc("/v1/updates", getUpdateListHandler).Methods("GET")
+	router.HandleFunc("/v1/updates", runUpdateHandler).Methods("POST")
+	router.HandleFunc("/v1/updates/{timestamp}", getUpdateHandler).Methods("GET")
+	router.HandleFunc("/v1/updates/{timestamp}", deleteUpdateHandler).Methods("DELETE")
+
 	router.HandleFunc("/v1/users", getUserListHandler).Methods("GET")
 	router.HandleFunc("/v1/users", createUserHandler).Methods("POST")
 	router.HandleFunc("/v1/users/{username}", getUserHandler).Methods("GET")
@@ -76,6 +83,12 @@ func parseFlag() {
 		"prometheus-conf-path",
 		"/etc/prometheus.yml",
 		"prometheus configuration file location",
+	)
+	flag.StringVar(
+		&updateDirPath,
+		"update-dir-path",
+		"/srv/update",
+		"update directory location",
 	)
 	flag.Parse()
 
