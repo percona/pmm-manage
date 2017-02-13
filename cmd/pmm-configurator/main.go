@@ -24,6 +24,7 @@ func main() {
 	router.HandleFunc("/v1/sshkey", getSSHKeyHandler).Methods("GET")
 	router.HandleFunc("/v1/sshkey", setSSHKeyHandler).Methods("POST")
 
+	router.HandleFunc("/v1/check-update", runCheckUpdateHandler).Methods("GET")
 	router.HandleFunc("/v1/updates", getUpdateListHandler).Methods("GET")
 	router.HandleFunc("/v1/updates", runUpdateHandler).Methods("POST")
 	router.HandleFunc("/v1/updates/{timestamp}", getUpdateHandler).Methods("GET")

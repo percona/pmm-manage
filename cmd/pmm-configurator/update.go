@@ -11,8 +11,47 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
+	"syscall"
 	"time"
 )
+
+func isPidAlive(pid int) bool {
+	if err := syscall.Kill(pid, syscall.Signal(0x0)); err == nil {
+		return true
+	}
+	return false
+}
+
+func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
+	pidFile := path.Join(updateDirPath, "pmm-update.pid")
+	if _, err := os.Stat(pidFile); err == nil {
+		timestamp, pid, err := getCurrentUpdate()
+		if err != nil {
+			returnError(w, req, http.StatusInternalServerError, "Cannot find update log", err)
+			return
+		}
+		if isPidAlive(pid) {
+			// update is going
+			returnLog(w, req, timestamp, http.StatusOK)
+			return
+		}
+	}
+
+	// check for update
+	if err := exec.Command("/usr/bin/pmm-update-check").Run(); err != nil {
+		// TODO: add "from"/"to" versions into Title
+		json.NewEncoder(w).Encode(jsonResponce{
+			Code:   http.StatusOK,
+			Status: http.StatusText(http.StatusOK),
+			Title:  "A new PMM version is available.",
+		})
+		return
+	}
+
+	// no update
+	returnError(w, req, http.StatusNotFound, "Your PMM version is up-to-date.", nil)
+}
 
 func readUpdateList() (map[string]string, error) {
 	result := make(map[string]string)
