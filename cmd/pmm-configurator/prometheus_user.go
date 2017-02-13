@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// TODO: should be fully reworked, implemented as very quick workaround for v1.1.0
 func replacePrometheusUser(newUser htuser) error {
 	input, err := ioutil.ReadFile(prometheusConfPath)
 	if err != nil {
