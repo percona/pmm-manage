@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -33,60 +32,6 @@ func main() {
 
 	log.Printf("PMM Configurator is started on %s address", c.ListenAddress)
 	log.Fatal(http.ListenAndServe(c.ListenAddress, router))
-}
-
-func parseFlag() {
-	flag.StringVar(
-		&c.HtpasswdPath,
-		"htpasswd-path",
-		"/srv/nginx/.htpasswd",
-		"htpasswd file location",
-	)
-	flag.StringVar(
-		&c.ListenAddress,
-		"listen-address",
-		"127.0.0.1:7777",
-		"Address and port to listen on: [ip_address]:port",
-	)
-	flag.StringVar(
-		&c.PathPrefix,
-		"url-prefix",
-		"/configurator",
-		"Prefix for the internal routes of web endpoints",
-	)
-	flag.StringVar(
-		&c.SSHKeyPath,
-		"ssh-key-path",
-		"",
-		"Path for SSH key",
-	)
-	flag.StringVar(
-		&c.SSHKeyOwner,
-		"ssh-key-owner",
-		"admin",
-		"Owner of SSH key",
-	)
-	flag.StringVar(
-		&c.GrafanaDBPath,
-		"grafana-db-path",
-		"/srv/grafana/grafana.db",
-		"grafana database location",
-	)
-	flag.StringVar(
-		&c.PrometheusConfPath,
-		"prometheus-conf-path",
-		"/etc/prometheus.yml",
-		"prometheus configuration file location",
-	)
-	flag.StringVar(
-		&c.UpdateDirPath,
-		"update-dir-path",
-		"/srv/update",
-		"update directory location",
-	)
-	flag.Parse()
-
-	runSSHKeyChecks()
 }
 
 func returnSuccess(w http.ResponseWriter) {
