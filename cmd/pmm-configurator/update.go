@@ -24,7 +24,7 @@ func isPidAlive(pid int) bool {
 }
 
 func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
-	pidFile := path.Join(updateDirPath, "pmm-update.pid")
+	pidFile := path.Join(c.UpdateDirPath, "pmm-update.pid")
 	if _, err := os.Stat(pidFile); err == nil {
 		timestamp, pid, err := getCurrentUpdate()
 		if err != nil {
@@ -61,7 +61,7 @@ func readUpdateList() (map[string]string, error) {
 		return result, err
 	}
 
-	logPath := path.Join(updateDirPath, "log")
+	logPath := path.Join(c.UpdateDirPath, "log")
 	files, err := ioutil.ReadDir(logPath)
 	if err != nil {
 		return result, err
@@ -109,7 +109,7 @@ func returnLog(w http.ResponseWriter, req *http.Request, timestamp string, httpS
 		return
 	}
 
-	filename := path.Join(updateDirPath, "log", logFile)
+	filename := path.Join(c.UpdateDirPath, "log", logFile)
 	fileContent, err := ioutil.ReadFile(filename)
 	if err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot read update log", err)
@@ -139,7 +139,7 @@ func returnLog(w http.ResponseWriter, req *http.Request, timestamp string, httpS
 		updateState = "in-progress"
 	}
 
-	location := fmt.Sprintf("http://%s%s/v1/updates/%s", req.Host, pathPrefix, timestamp)
+	location := fmt.Sprintf("http://%s%s/v1/updates/%s", req.Host, c.PathPrefix, timestamp)
 	w.Header().Set("Location", location)
 	w.WriteHeader(httpStatus)
 
@@ -169,7 +169,7 @@ func runUpdateHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func getCurrentUpdate() (string, int, error) {
-	pidFile := path.Join(updateDirPath, "pmm-update.pid")
+	pidFile := path.Join(c.UpdateDirPath, "pmm-update.pid")
 	pid, err := ioutil.ReadFile(pidFile)
 	if err != nil {
 		return "", -1, err
@@ -182,7 +182,7 @@ func getCurrentUpdate() (string, int, error) {
 	}
 
 	pattern := fmt.Sprintf("PID: %s$", pidStr)
-	logPath := path.Join(updateDirPath, "log/*.log")
+	logPath := path.Join(c.UpdateDirPath, "log/*.log")
 	logs, err := filepath.Glob(logPath)
 	if err != nil {
 		return "", -1, err
@@ -221,7 +221,7 @@ func deleteUpdateHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	filename := path.Join(updateDirPath, "log", logFile)
+	filename := path.Join(c.UpdateDirPath, "log", logFile)
 	if err = os.Remove(filename); err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot remove update log", nil)
 		return

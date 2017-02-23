@@ -16,15 +16,15 @@ import (
 )
 
 func runSSHKeyChecks() {
-	sshKeyUser, err := user.Lookup(sshKeyOwner)
+	sshKeyUser, err := user.Lookup(c.SSHKeyOwner)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if sshKeyPath == "" {
-		sshKeyPath = path.Join(sshKeyUser.HomeDir, ".ssh/authorized_keys")
+	if c.SSHKeyPath == "" {
+		c.SSHKeyPath = path.Join(sshKeyUser.HomeDir, ".ssh/authorized_keys")
 	}
 
-	sshKeyDir := filepath.Dir(sshKeyPath)
+	sshKeyDir := filepath.Dir(c.SSHKeyPath)
 	if dir, err := os.Stat(sshKeyDir); err != nil || !dir.IsDir() {
 		if err := os.MkdirAll(sshKeyDir, 0700); err != nil {
 			errorStr := fmt.Sprintf("Cannot create '%s' directory: %s", sshKeyDir, err)
@@ -56,7 +56,7 @@ func parseSSHKey(authorizedKey []byte) (sshkey, error) {
 }
 
 func getSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
-	authorizedKey, err := ioutil.ReadFile(sshKeyPath)
+	authorizedKey, err := ioutil.ReadFile(c.SSHKeyPath)
 	if err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot read ssh key", err)
 		return
@@ -82,18 +82,18 @@ func setSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := ioutil.WriteFile(sshKeyPath, []byte(newSSHKey.Key), 0600); err != nil {
+	if err := ioutil.WriteFile(c.SSHKeyPath, []byte(newSSHKey.Key), 0600); err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot create authorized_keys file", err)
 		return
 	}
 
-	sshKeyUser, err := user.Lookup(sshKeyOwner)
+	sshKeyUser, err := user.Lookup(c.SSHKeyOwner)
 	if err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot lookup owner for authorized_keys file", err)
 	}
 	uid, _ := strconv.Atoi(sshKeyUser.Uid)
 	gid, _ := strconv.Atoi(sshKeyUser.Gid)
-	if err := os.Chown(sshKeyPath, uid, gid); err != nil {
+	if err := os.Chown(c.SSHKeyPath, uid, gid); err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot change owner for authorized_keys file", err)
 	}
 

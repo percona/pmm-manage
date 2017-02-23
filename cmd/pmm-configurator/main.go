@@ -8,19 +8,12 @@ import (
 	"net/http"
 )
 
-var pathPrefix string
-var sshKeyPath string
-var sshKeyOwner string
-var htpasswdPath string
-var updateDirPath string
-var grafanaDBPath string
-var listenAddress string
-var prometheusConfPath string
+var c confConfig
 
 func main() {
 	parseFlag()
 
-	router := mux.NewRouter().PathPrefix(pathPrefix).Subrouter()
+	router := mux.NewRouter().PathPrefix(c.PathPrefix).Subrouter()
 	router.HandleFunc("/v1/sshkey", getSSHKeyHandler).Methods("GET")
 	router.HandleFunc("/v1/sshkey", setSSHKeyHandler).Methods("POST")
 
@@ -38,55 +31,55 @@ func main() {
 	// TODO: create separate handler with old password verification
 	router.HandleFunc("/v1/users/{username}", createUserHandler).Methods("PATCH")
 
-	log.Printf("PMM Configurator is started on %s address", listenAddress)
-	log.Fatal(http.ListenAndServe(listenAddress, router))
+	log.Printf("PMM Configurator is started on %s address", c.ListenAddress)
+	log.Fatal(http.ListenAndServe(c.ListenAddress, router))
 }
 
 func parseFlag() {
 	flag.StringVar(
-		&htpasswdPath,
+		&c.HtpasswdPath,
 		"htpasswd-path",
 		"/srv/nginx/.htpasswd",
 		"htpasswd file location",
 	)
 	flag.StringVar(
-		&listenAddress,
+		&c.ListenAddress,
 		"listen-address",
 		"127.0.0.1:7777",
 		"Address and port to listen on: [ip_address]:port",
 	)
 	flag.StringVar(
-		&pathPrefix,
+		&c.PathPrefix,
 		"url-prefix",
 		"/configurator",
 		"Prefix for the internal routes of web endpoints",
 	)
 	flag.StringVar(
-		&sshKeyPath,
+		&c.SSHKeyPath,
 		"ssh-key-path",
 		"",
 		"Path for SSH key",
 	)
 	flag.StringVar(
-		&sshKeyOwner,
+		&c.SSHKeyOwner,
 		"ssh-key-owner",
 		"admin",
 		"Owner of SSH key",
 	)
 	flag.StringVar(
-		&grafanaDBPath,
+		&c.GrafanaDBPath,
 		"grafana-db-path",
 		"/srv/grafana/grafana.db",
 		"grafana database location",
 	)
 	flag.StringVar(
-		&prometheusConfPath,
+		&c.PrometheusConfPath,
 		"prometheus-conf-path",
 		"/etc/prometheus.yml",
 		"prometheus configuration file location",
 	)
 	flag.StringVar(
-		&updateDirPath,
+		&c.UpdateDirPath,
 		"update-dir-path",
 		"/srv/update",
 		"update directory location",
