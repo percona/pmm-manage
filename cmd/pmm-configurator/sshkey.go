@@ -27,19 +27,16 @@ func runSSHKeyChecks() {
 	sshKeyDir := filepath.Dir(c.SSHKeyPath)
 	if dir, err := os.Stat(sshKeyDir); err != nil || !dir.IsDir() {
 		if err := os.MkdirAll(sshKeyDir, 0700); err != nil {
-			errorStr := fmt.Sprintf("Cannot create '%s' directory: %s", sshKeyDir, err)
-			log.Fatal(errorStr)
+			log.Fatalf("Cannot create '%s' directory: %s", sshKeyDir, err)
 		}
 		uid, _ := strconv.Atoi(sshKeyUser.Uid)
 		gid, _ := strconv.Atoi(sshKeyUser.Gid)
 		if err := os.Chown(sshKeyDir, uid, gid); err != nil {
-			errorStr := fmt.Sprintf("Cannot change owner for '%s' directory: %s\n", sshKeyDir, err)
-			log.Fatal(errorStr)
+			log.Fatalf("Cannot change owner for '%s' directory: %s\n", sshKeyDir, err)
 		}
 	}
 	if err := unix.Access(sshKeyDir, unix.W_OK); err != nil {
-		errorStr := fmt.Sprintf("Cannot write to '%s' directory: %s\n", sshKeyDir, err)
-		log.Fatal(errorStr)
+		log.Fatalf("Cannot write to '%s' directory: %s\n", sshKeyDir, err)
 	}
 }
 

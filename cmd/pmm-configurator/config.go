@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -73,13 +72,11 @@ func parseConfig() {
 		return
 	}
 	if err != nil {
-		errorStr := fmt.Sprintf("Cannot read '%s' config file: %s\n", c.ConfigPath, err)
-		log.Fatal(errorStr)
+		log.Fatalf("Cannot read '%s' config file: %s\n", c.ConfigPath, err)
 	}
 
 	err = yaml.Unmarshal(configBytes, &c)
 	if err != nil {
-		errorStr := fmt.Sprintf("Cannot parse '%s' config file: %s\n", c.ConfigPath, err)
-		log.Fatal(errorStr)
+		log.Fatalf("Cannot parse '%s' config file: %s\n", c.ConfigPath, err)
 	}
 }
