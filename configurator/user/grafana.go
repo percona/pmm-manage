@@ -3,7 +3,7 @@ package user
 import (
 	"database/sql"
 	"github.com/grafana/grafana/pkg/util"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // sqlite driver requires such import
 )
 
 func createGrafanaUser(newUser PMMUser) error {
@@ -16,9 +16,9 @@ func createGrafanaUser(newUser PMMUser) error {
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer db.Close() // nolint: errcheck
 
-	if _, err := db.Exec("PRAGMA busy_timeout = 60000"); err != nil {
+	if _, err = db.Exec("PRAGMA busy_timeout = 60000"); err != nil {
 		return err
 	}
 
@@ -95,7 +95,7 @@ func deleteGrafanaUser(username string) error {
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer db.Close() // nolint: errcheck
 
 	stmt, err := db.Prepare("DELETE FROM user WHERE login = ?")
 	if err != nil {

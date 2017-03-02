@@ -5,6 +5,7 @@ import (
 	"github.com/Percona-Lab/pmm-manage/configurator/config"
 	"github.com/Percona-Lab/pmm-manage/configurator/user"
 	"github.com/gorilla/mux"
+	"io"
 	"log"
 	"net/http"
 )
@@ -38,25 +39,25 @@ func main() {
 	log.Fatal(http.ListenAndServe(c.ListenAddress, router))
 }
 
-func returnSuccess(w http.ResponseWriter) {
-	json.NewEncoder(w).Encode(jsonResponce{
+func returnSuccess(w io.Writer) {
+	json.NewEncoder(w).Encode(jsonResponce{ // nolint: errcheck
 		Code:   http.StatusOK,
 		Status: http.StatusText(http.StatusOK),
 	})
 }
 
 func returnError(w http.ResponseWriter, req *http.Request, httpStatus int, title string, err error) {
-	responce := jsonResponce{
+	response := jsonResponce{
 		Code:   httpStatus,
 		Status: http.StatusText(httpStatus),
 		Title:  title,
 	}
 	if err != nil {
-		responce.Detail = err.Error()
+		response.Detail = err.Error()
 	}
 
-	responceJSON, _ := json.Marshal(responce)
-	log.Printf("%s %s: %s", req.Method, req.URL.String(), responceJSON)
+	responseJSON, _ := json.Marshal(response)
+	log.Printf("%s %s: %s", req.Method, req.URL.String(), responseJSON)
 
-	http.Error(w, string(responceJSON)+"\n", httpStatus)
+	http.Error(w, string(responseJSON)+"\n", httpStatus)
 }

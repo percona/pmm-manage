@@ -63,7 +63,7 @@ func getSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
 		returnError(w, req, http.StatusInternalServerError, "Cannot parse ssh key", err)
 		return
 	}
-	json.NewEncoder(w).Encode(sshKey)
+	json.NewEncoder(w).Encode(sshKey) // nolint: errcheck
 }
 
 func setSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
@@ -79,7 +79,7 @@ func setSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := ioutil.WriteFile(c.SSHKeyPath, []byte(newSSHKey.Key), 0600); err != nil {
+	if err = ioutil.WriteFile(c.SSHKeyPath, []byte(newSSHKey.Key), 0600); err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot create authorized_keys file", err)
 		return
 	}
@@ -97,5 +97,5 @@ func setSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
 	location := fmt.Sprintf("http://%s%s", req.Host, req.URL.String())
 	w.Header().Set("Location", location)
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(parsedSSHKey)
+	json.NewEncoder(w).Encode(parsedSSHKey) // nolint: errcheck
 }

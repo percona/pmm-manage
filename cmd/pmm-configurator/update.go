@@ -39,9 +39,9 @@ func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// check for update
-	if err := exec.Command("/usr/bin/pmm-update-check").Run(); err != nil {
+	if err := exec.Command("/usr/bin/pmm-update-check").Run(); err != nil { // nolint: gas
 		// TODO: add "from"/"to" versions into Title
-		json.NewEncoder(w).Encode(jsonResponce{
+		json.NewEncoder(w).Encode(jsonResponce{ // nolint: errcheck
 			Code:   http.StatusOK,
 			Status: http.StatusText(http.StatusOK),
 			Title:  "A new PMM version is available.",
@@ -88,7 +88,7 @@ func getUpdateListHandler(w http.ResponseWriter, req *http.Request) {
 		keys = append(keys, k)
 	}
 
-	json.NewEncoder(w).Encode(keys)
+	json.NewEncoder(w).Encode(keys) // nolint: errcheck
 }
 
 func getUpdateHandler(w http.ResponseWriter, req *http.Request) {
@@ -143,7 +143,7 @@ func returnLog(w http.ResponseWriter, req *http.Request, timestamp string, httpS
 	w.Header().Set("Location", location)
 	w.WriteHeader(httpStatus)
 
-	json.NewEncoder(w).Encode(jsonResponce{
+	json.NewEncoder(w).Encode(jsonResponce{ // nolint: errcheck
 		Code:   httpStatus,
 		Status: http.StatusText(httpStatus),
 		Title:  updateState,
@@ -152,7 +152,7 @@ func returnLog(w http.ResponseWriter, req *http.Request, timestamp string, httpS
 }
 
 func runUpdateHandler(w http.ResponseWriter, req *http.Request) {
-	if err := exec.Command("screen", "-d", "-m", "/usr/bin/pmm-update").Run(); err != nil {
+	if err := exec.Command("screen", "-d", "-m", "/usr/bin/pmm-update").Run(); err != nil { // nolint: gas
 		returnError(w, req, http.StatusInternalServerError, "Cannot run update", err)
 		return
 	}
@@ -189,7 +189,7 @@ func getCurrentUpdate() (string, int, error) {
 	}
 
 	args := append([]string{pattern}, logs...)
-	currentLogOutput, err := exec.Command("grep", args...).Output()
+	currentLogOutput, err := exec.Command("grep", args...).Output() // nolint: gas
 	if err != nil {
 		return "", -1, err
 	}

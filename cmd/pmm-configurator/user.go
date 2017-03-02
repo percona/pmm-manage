@@ -13,7 +13,7 @@ func returnUser(w http.ResponseWriter, req *http.Request, username string) {
 
 	for _, item := range users {
 		if item.Username == username {
-			json.NewEncoder(w).Encode(item)
+			json.NewEncoder(w).Encode(item) // nolint: errcheck
 			return
 		}
 	}
@@ -22,7 +22,7 @@ func returnUser(w http.ResponseWriter, req *http.Request, username string) {
 
 func getUserListHandler(w http.ResponseWriter, req *http.Request) {
 	users := user.ReadHTTPUsers()
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(users) // nolint: errcheck
 }
 
 func getUserHandler(w http.ResponseWriter, req *http.Request) {

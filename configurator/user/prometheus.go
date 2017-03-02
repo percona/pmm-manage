@@ -24,7 +24,7 @@ func replacePrometheusUser(newUser PMMUser) error {
 	}
 	output := strings.Join(lines, "\n")
 
-	if err := ioutil.WriteFile(PMMConfig.PrometheusConfPath, []byte(output), 0644); err != nil {
+	if err = ioutil.WriteFile(PMMConfig.PrometheusConfPath, []byte(output), 0644); err != nil {
 		return err
 	}
 
