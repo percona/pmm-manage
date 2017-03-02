@@ -11,15 +11,16 @@ import (
 
 // PMMConfig implements struct with all configuration params in one place
 type PMMConfig struct {
-	ConfigPath         string `yaml:"config"               default:""                        desc:"configuration file location"`
-	HtpasswdPath       string `yaml:"htpasswd-path"        default:"/srv/nginx/.htpasswd"    desc:"htpasswd file location"`
-	ListenAddress      string `yaml:"listen-address"       default:"127.0.0.1:7777"          desc:"Address and port to listen on: [ip_address]:port"`
-	PathPrefix         string `yaml:"url-prefix"           default:"/configurator"           desc:"Prefix for the internal routes of web endpoints"`
-	SSHKeyPath         string `yaml:"ssh-key-path"         default:""                        desc:"authorized_keys file location"`
-	SSHKeyOwner        string `yaml:"ssh-key-owner"        default:"admin"                   desc:"Owner of authorized_keys file"`
-	GrafanaDBPath      string `yaml:"grafana-db-path"      default:"/srv/grafana/grafana.db" desc:"grafana database location"`
-	PrometheusConfPath string `yaml:"prometheus-conf-path" default:"/etc/prometheus.yml"     desc:"prometheus configuration file location"`
-	UpdateDirPath      string `yaml:"update-dir-path"      default:"/srv/update"             desc:"update directory location"`
+	ConfigPath         string            `yaml:"config"               default:""                        desc:"configuration file location"`
+	HtpasswdPath       string            `yaml:"htpasswd-path"        default:"/srv/nginx/.htpasswd"    desc:"htpasswd file location"`
+	ListenAddress      string            `yaml:"listen-address"       default:"127.0.0.1:7777"          desc:"Address and port to listen on: [ip_address]:port"`
+	PathPrefix         string            `yaml:"url-prefix"           default:"/configurator"           desc:"Prefix for the internal routes of web endpoints"`
+	SSHKeyPath         string            `yaml:"ssh-key-path"         default:""                        desc:"authorized_keys file location"`
+	SSHKeyOwner        string            `yaml:"ssh-key-owner"        default:"admin"                   desc:"Owner of authorized_keys file"`
+	GrafanaDBPath      string            `yaml:"grafana-db-path"      default:"/srv/grafana/grafana.db" desc:"grafana database location"`
+	PrometheusConfPath string            `yaml:"prometheus-conf-path" default:"/etc/prometheus.yml"     desc:"prometheus configuration file location"`
+	UpdateDirPath      string            `yaml:"update-dir-path"      default:"/srv/update"             desc:"update directory location"`
+	Configuration      map[string]string `yaml:"configuration"        default:""                        desc:""`
 }
 
 // ParseConfig implements function which read command line arguments, configuration file and set default values
@@ -28,14 +29,17 @@ func ParseConfig() (c PMMConfig) {
 	v := reflect.ValueOf(&c).Elem()
 	// iterate over all confConfig fields
 	for i := 0; i < v.NumField(); i++ {
-		// get poiner to confConfig field, like &c.SSHKeyOwner
-		valueAddr := v.Field(i).Addr().Interface().(*string)
-		// get string with argument name, like "ssh-key-owner"
-		yamlTag := t.Field(i).Tag.Get("yaml")
 		// get string with argument description, like "Owner of authorized_keys file"
 		descTag := t.Field(i).Tag.Get("desc")
-		// pass pointer, argument name and argument description to flag library
-		flag.StringVar(valueAddr, yamlTag, "", descTag)
+		// skip config file only fields
+		if descTag != "" {
+			// get poiner to confConfig field, like &c.SSHKeyOwner
+			valueAddr := v.Field(i).Addr().Interface().(*string)
+			// get string with argument name, like "ssh-key-owner"
+			yamlTag := t.Field(i).Tag.Get("yaml")
+			// pass pointer, argument name and argument description to flag library
+			flag.StringVar(valueAddr, yamlTag, "", descTag)
+		}
 	}
 
 	flag.Parse()

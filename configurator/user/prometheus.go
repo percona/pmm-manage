@@ -28,14 +28,16 @@ func replacePrometheusUser(newUser PMMUser) error {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", "http://127.0.0.1:9090/prometheus/-/reload", nil)
-	if err != nil {
-		return err
-	}
+	if val, ok := PMMConfig.Configuration["skip-prometheus-reload"]; !ok || val != "true" {
+		req, err := http.NewRequest("POST", "http://127.0.0.1:9090/prometheus/-/reload", nil)
+		if err != nil {
+			return err
+		}
 
-	client := &http.Client{}
-	if _, err := client.Do(req); err != nil {
-		return err
+		client := &http.Client{}
+		if _, err := client.Do(req); err != nil {
+			return err
+		}
 	}
 
 	return nil
