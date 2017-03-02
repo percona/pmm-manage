@@ -1,10 +1,5 @@
 package main
 
-type htuser struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
 type sshkey struct {
 	Key         string `json:"key,omitempty"`
 	Type        string `json:"type,omitempty"`

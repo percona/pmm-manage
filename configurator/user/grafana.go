@@ -1,4 +1,4 @@
-package main
+package user
 
 import (
 	"database/sql"
@@ -6,13 +6,13 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func createGrafanaUser(newUser htuser) error {
+func createGrafanaUser(newUser PMMUser) error {
 	email := newUser.Username + "@localhost"
 	salt := util.GetRandomString(10)
 	rands := util.GetRandomString(10)
 	password := util.EncodePassword(newUser.Password, salt)
 
-	db, err := sql.Open("sqlite3", c.GrafanaDBPath)
+	db, err := sql.Open("sqlite3", PMMConfig.GrafanaDBPath)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func addUserToOrg(db *sql.DB, userID int64) error {
 }
 
 func deleteGrafanaUser(username string) error {
-	db, err := sql.Open("sqlite3", c.GrafanaDBPath)
+	db, err := sql.Open("sqlite3", PMMConfig.GrafanaDBPath)
 	if err != nil {
 		return err
 	}

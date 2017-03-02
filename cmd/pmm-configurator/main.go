@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/Percona-Lab/pmm-manage/configurator/config"
+	"github.com/Percona-Lab/pmm-manage/configurator/user"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -12,6 +13,7 @@ var c config.PMMConfig
 
 func main() {
 	c = config.ParseConfig()
+	user.PMMConfig = c
 	runSSHKeyChecks()
 
 	router := mux.NewRouter().PathPrefix(c.PathPrefix).Subrouter()

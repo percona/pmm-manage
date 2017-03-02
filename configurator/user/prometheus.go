@@ -1,4 +1,4 @@
-package main
+package user
 
 import (
 	"io/ioutil"
@@ -7,8 +7,8 @@ import (
 )
 
 // TODO: should be fully reworked, implemented as very quick workaround for v1.1.0
-func replacePrometheusUser(newUser htuser) error {
-	input, err := ioutil.ReadFile(c.PrometheusConfPath)
+func replacePrometheusUser(newUser PMMUser) error {
+	input, err := ioutil.ReadFile(PMMConfig.PrometheusConfPath)
 	if err != nil {
 		return err
 	}
@@ -24,7 +24,7 @@ func replacePrometheusUser(newUser htuser) error {
 	}
 	output := strings.Join(lines, "\n")
 
-	if err := ioutil.WriteFile(c.PrometheusConfPath, []byte(output), 0644); err != nil {
+	if err := ioutil.WriteFile(PMMConfig.PrometheusConfPath, []byte(output), 0644); err != nil {
 		return err
 	}
 
