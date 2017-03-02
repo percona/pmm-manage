@@ -2,25 +2,17 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 )
 
-var pathPrefix string
-var sshKeyPath string
-var sshKeyOwner string
-var htpasswdPath string
-var updateDirPath string
-var grafanaDBPath string
-var listenAddress string
-var prometheusConfPath string
+var c confConfig
 
 func main() {
 	parseFlag()
 
-	router := mux.NewRouter().PathPrefix(pathPrefix).Subrouter()
+	router := mux.NewRouter().PathPrefix(c.PathPrefix).Subrouter()
 	router.HandleFunc("/v1/sshkey", getSSHKeyHandler).Methods("GET")
 	router.HandleFunc("/v1/sshkey", setSSHKeyHandler).Methods("POST")
 
@@ -38,62 +30,8 @@ func main() {
 	// TODO: create separate handler with old password verification
 	router.HandleFunc("/v1/users/{username}", createUserHandler).Methods("PATCH")
 
-	log.Printf("PMM Configurator is started on %s address", listenAddress)
-	log.Fatal(http.ListenAndServe(listenAddress, router))
-}
-
-func parseFlag() {
-	flag.StringVar(
-		&htpasswdPath,
-		"htpasswd-path",
-		"/srv/nginx/.htpasswd",
-		"htpasswd file location",
-	)
-	flag.StringVar(
-		&listenAddress,
-		"listen-address",
-		"127.0.0.1:7777",
-		"Address and port to listen on: [ip_address]:port",
-	)
-	flag.StringVar(
-		&pathPrefix,
-		"url-prefix",
-		"/configurator",
-		"Prefix for the internal routes of web endpoints",
-	)
-	flag.StringVar(
-		&sshKeyPath,
-		"ssh-key-path",
-		"",
-		"Path for SSH key",
-	)
-	flag.StringVar(
-		&sshKeyOwner,
-		"ssh-key-owner",
-		"admin",
-		"Owner of SSH key",
-	)
-	flag.StringVar(
-		&grafanaDBPath,
-		"grafana-db-path",
-		"/srv/grafana/grafana.db",
-		"grafana database location",
-	)
-	flag.StringVar(
-		&prometheusConfPath,
-		"prometheus-conf-path",
-		"/etc/prometheus.yml",
-		"prometheus configuration file location",
-	)
-	flag.StringVar(
-		&updateDirPath,
-		"update-dir-path",
-		"/srv/update",
-		"update directory location",
-	)
-	flag.Parse()
-
-	runSSHKeyChecks()
+	log.Printf("PMM Configurator is started on %s address", c.ListenAddress)
+	log.Fatal(http.ListenAndServe(c.ListenAddress, router))
 }
 
 func returnSuccess(w http.ResponseWriter) {
