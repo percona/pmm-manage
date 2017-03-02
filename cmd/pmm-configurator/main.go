@@ -2,15 +2,17 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/Percona-Lab/pmm-manage/configurator/config"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 )
 
-var c confConfig
+var c config.PMMConfig
 
 func main() {
-	parseFlag()
+	c = config.ParseConfig()
+	runSSHKeyChecks()
 
 	router := mux.NewRouter().PathPrefix(c.PathPrefix).Subrouter()
 	router.HandleFunc("/v1/sshkey", getSSHKeyHandler).Methods("GET")

@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"flag"
@@ -9,7 +9,8 @@ import (
 	"reflect"
 )
 
-type confConfig struct {
+// PMMConfig implements struct with all configuration params in one place
+type PMMConfig struct {
 	ConfigPath         string `yaml:"config"               default:""                        desc:"configuration file location"`
 	HtpasswdPath       string `yaml:"htpasswd-path"        default:"/srv/nginx/.htpasswd"    desc:"htpasswd file location"`
 	ListenAddress      string `yaml:"listen-address"       default:"127.0.0.1:7777"          desc:"Address and port to listen on: [ip_address]:port"`
@@ -21,7 +22,8 @@ type confConfig struct {
 	UpdateDirPath      string `yaml:"update-dir-path"      default:"/srv/update"             desc:"update directory location"`
 }
 
-func parseFlag() {
+// ParseConfig implements function which read command line arguments, configuration file and set default values
+func ParseConfig() (c PMMConfig) {
 	t := reflect.TypeOf(&c).Elem()
 	v := reflect.ValueOf(&c).Elem()
 	// iterate over all confConfig fields
@@ -29,30 +31,30 @@ func parseFlag() {
 		// get poiner to confConfig field, like &c.SSHKeyOwner
 		valueAddr := v.Field(i).Addr().Interface().(*string)
 		// get string with argument name, like "ssh-key-owner"
-		yaml := string(t.Field(i).Tag.Get("yaml"))
+		yamlTag := t.Field(i).Tag.Get("yaml")
 		// get string with argument description, like "Owner of authorized_keys file"
-		desc := string(t.Field(i).Tag.Get("desc"))
+		descTag := t.Field(i).Tag.Get("desc")
 		// pass pointer, argument name and argument description to flag library
-		flag.StringVar(valueAddr, yaml, "", desc)
+		flag.StringVar(valueAddr, yamlTag, "", descTag)
 	}
 
 	flag.Parse()
-	parseConfig()
+	c.parseConfig()
 	flag.Parse() // command line should overide config
+	c.setDefaultValues()
 
-	setDefaultValues()
-	runSSHKeyChecks()
+	return c
 }
 
-func setDefaultValues() {
-	t := reflect.TypeOf(&c).Elem()
-	v := reflect.ValueOf(&c).Elem()
+func (c *PMMConfig) setDefaultValues() {
+	t := reflect.TypeOf(c).Elem()
+	v := reflect.ValueOf(c).Elem()
 	// iterate over all confConfig fields
 	for i := 0; i < v.NumField(); i++ {
 		// get string with current value of field (which have been read from config)
 		curValue := v.Field(i).String()
 		// get string with default value of field
-		defValue := string(t.Field(i).Tag.Get("default"))
+		defValue := t.Field(i).Tag.Get("default")
 
 		if curValue == "" {
 			v.Field(i).SetString(defValue)
@@ -60,7 +62,7 @@ func setDefaultValues() {
 	}
 }
 
-func parseConfig() {
+func (c *PMMConfig) parseConfig() {
 	// parseConfig() runs before setDefaultValues(), so it is needed to set default manually
 	if c.ConfigPath == "" {
 		c.ConfigPath = "/srv/update/pmm-manage.yml"
