@@ -1,7 +1,12 @@
-grafana-db-path: ./tests/sandbox/grafana.db
 htpasswd-path: ./tests/sandbox/htpasswd
-prometheus-conf-path: ./tests/sandbox/prometheus.yml
+listen-address: 127.0.0.1:7777
+url-prefix: /configurator
 ssh-key-path: ./tests/sandbox/authorized_keys
+grafana-db-path: ./tests/sandbox/grafana.db
+prometheus-conf-path: ./tests/sandbox/prometheus.yml
 update-dir-path: ./tests/sandbox
 configuration:
-    skip-prometheus-reload: true
+  skip-prometheus-reload: "true"
+users:
+- password: pass1word
+  username: user1name
