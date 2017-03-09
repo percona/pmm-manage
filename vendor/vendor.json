@@ -8,6 +8,12 @@
 			"revision": ""
 		},
 		{
+			"checksumSHA1": "NRonvQTe073YVead6//CQ5oVgK4=",
+			"path": "github.com/Sirupsen/logrus",
+			"revision": "1deb2db2a6fff8a35532079061b903c3a25eed52",
+			"revisionTime": "2017-03-08T20:36:35Z"
+		},
+		{
 			"checksumSHA1": "8tr/0BcOdw8cLmhJy7nd+QIzlA0=",
 			"path": "github.com/foomo/htpasswd",
 			"revision": "5c693a30dfc9ed2dda015a0759a5572fa0f53fca",
@@ -60,6 +66,12 @@
 			"path": "github.com/mattn/go-colorable",
 			"revision": "d228849504861217f796da67fae4f6e347643f15",
 			"revisionTime": "2016-11-03T16:00:40Z"
+		},
+		{
+			"checksumSHA1": "EkT5JmFvz3zOPWappEFyYWUaeY0=",
+			"path": "github.com/mattn/go-isatty",
+			"revision": "281032e84ae07510239465db46bf442aa44b953a",
+			"revisionTime": "2017-02-09T17:56:15Z"
 		},
 		{
 			"checksumSHA1": "T257PCfs9nHqBdrjjoGEhl5CL18=",
