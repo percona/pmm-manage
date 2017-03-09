@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"github.com/Percona-Lab/pmm-manage/configurator/config"
 	"github.com/Percona-Lab/pmm-manage/configurator/user"
+	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -35,7 +35,9 @@ func main() {
 	// TODO: create separate handler with old password verification
 	router.HandleFunc("/v1/users/{username}", createUserHandler).Methods("PATCH")
 
-	log.Printf("PMM Configurator is started on %s address", c.ListenAddress)
+	log.WithFields(log.Fields{
+		"address": c.ListenAddress,
+	}).Info("PMM Configurator is started")
 	log.Fatal(http.ListenAndServe(c.ListenAddress, router))
 }
 
@@ -57,7 +59,7 @@ func returnError(w http.ResponseWriter, req *http.Request, httpStatus int, title
 	}
 
 	responseJSON, _ := json.Marshal(response)
-	log.Printf("%s %s: %s", req.Method, req.URL.String(), responseJSON)
+	log.Errorf("%s %s: %s", req.Method, req.URL.String(), responseJSON)
 
 	http.Error(w, string(responseJSON)+"\n", httpStatus)
 }

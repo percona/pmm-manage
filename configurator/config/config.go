@@ -2,9 +2,9 @@ package config
 
 import (
 	"flag"
+	log "github.com/Sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"log"
 	"os"
 	"reflect"
 )
@@ -79,12 +79,20 @@ func (c *PMMConfig) parseConfig() {
 		return
 	}
 	if err != nil {
-		log.Fatalf("Cannot read '%s' config file: %s\n", c.ConfigPath, err)
+		log.WithFields(log.Fields{
+			"file":  c.ConfigPath,
+			"error": err,
+		}).Error("Cannot read config file")
+		return
 	}
 
 	err = yaml.Unmarshal(configBytes, &c)
 	if err != nil {
-		log.Fatalf("Cannot parse '%s' config file: %s\n", c.ConfigPath, err)
+		log.WithFields(log.Fields{
+			"file":  c.ConfigPath,
+			"error": err,
+		}).Error("Cannot parse config file")
+		return
 	}
 }
 
@@ -92,12 +100,17 @@ func (c *PMMConfig) parseConfig() {
 func (c *PMMConfig) Save() {
 	bytes, err := yaml.Marshal(c)
 	if err != nil {
-		log.Printf("Cannot encode configuration: %s\n", err)
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Cannot encode configuration")
 		return
 	}
 
 	if err = ioutil.WriteFile(c.ConfigPath, bytes, 0644); err != nil {
-		log.Printf("Cannot save configuration file: %s\n", err)
+		log.WithFields(log.Fields{
+			"file":  c.ConfigPath,
+			"error": err,
+		}).Error("Cannot save configuration file")
 		return
 	}
 }
