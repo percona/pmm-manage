@@ -4,6 +4,7 @@ import (
 	"flag"
 	log "github.com/Sirupsen/logrus"
 	"gopkg.in/yaml.v2"
+	"io"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -20,6 +21,7 @@ type PMMConfig struct {
 	GrafanaDBPath      string              `yaml:"grafana-db-path"      default:"/srv/grafana/grafana.db" desc:"grafana database location"`
 	PrometheusConfPath string              `yaml:"prometheus-conf-path" default:"/etc/prometheus.yml"     desc:"prometheus configuration file location"`
 	UpdateDirPath      string              `yaml:"update-dir-path"      default:"/srv/update"             desc:"update directory location"`
+	LogFilePath        string              `yaml:"log-file"             default:"/var/log/pmm-manage.log" desc:"log file location"`
 	Configuration      map[string]string   `yaml:"configuration"        default:""                        desc:""`
 	Users              []map[string]string `yaml:"users"                default:""                        desc:""`
 }
@@ -47,6 +49,7 @@ func ParseConfig() (c PMMConfig) {
 	c.parseConfig()
 	flag.Parse() // command line should overide config
 	c.setDefaultValues()
+	c.setLogger()
 
 	return c
 }
@@ -112,5 +115,17 @@ func (c *PMMConfig) Save() {
 			"error": err,
 		}).Error("Cannot save configuration file")
 		return
+	}
+}
+
+func (c *PMMConfig) setLogger() {
+	log.SetFormatter(&log.TextFormatter{DisableColors: true})
+	if logFile, err := os.OpenFile(c.LogFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644); err != nil { // nolint: gas
+		log.WithFields(log.Fields{
+			"file":  c.LogFilePath,
+			"error": err,
+		}).Error("Failed to log to file, using default stderr")
+	} else {
+		log.SetOutput(io.MultiWriter(logFile, os.Stderr))
 	}
 }

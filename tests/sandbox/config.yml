@@ -5,6 +5,7 @@ ssh-key-path: ./tests/sandbox/authorized_keys
 grafana-db-path: ./tests/sandbox/grafana.db
 prometheus-conf-path: ./tests/sandbox/prometheus.yml
 update-dir-path: ./tests/sandbox
+log-file: ./tests/sandbox/pmm-manage.log
 configuration:
   skip-prometheus-reload: "true"
 users:
