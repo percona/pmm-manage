@@ -62,6 +62,12 @@
 			"revisionTime": "2016-10-26T22:19:13Z"
 		},
 		{
+			"checksumSHA1": "abKzFXAn0KDr5U+JON1ZgJ2lUtU=",
+			"path": "github.com/kr/logfmt",
+			"revision": "b84e30acd515aadc4b783ad4ff83aff3299bdfe0",
+			"revisionTime": "2014-02-26T03:06:59Z"
+		},
+		{
 			"checksumSHA1": "I4njd26dG5hxFT2nawuByM4pxzY=",
 			"path": "github.com/mattn/go-colorable",
 			"revision": "d228849504861217f796da67fae4f6e347643f15",
@@ -132,6 +138,12 @@
 			"path": "gopkg.in/ini.v1",
 			"revision": "e3c2d47c61e5333f9aa2974695dd94396eb69c75",
 			"revisionTime": "2017-01-23T09:11:46Z"
+		},
+		{
+			"checksumSHA1": "dEq3EOUlisOe0lOB3P8A3oU5PEM=",
+			"path": "gopkg.in/logfmt.v0",
+			"revision": "390ab7935ee28ec6b286364bba9b4dd6410cb3d5",
+			"revisionTime": "2016-11-15T14:25:13Z"
 		},
 		{
 			"checksumSHA1": "0KwOlQV1dNUh9X8t+5s7nX5bqfk=",
