@@ -18,6 +18,8 @@ func main() {
 	runSSHKeyChecks()
 
 	router := mux.NewRouter().PathPrefix(c.PathPrefix).Subrouter()
+	router.HandleFunc("/v1/logs", getLogFileHandler).Methods("GET")
+
 	router.HandleFunc("/v1/sshkey", getSSHKeyHandler).Methods("GET")
 	router.HandleFunc("/v1/sshkey", setSSHKeyHandler).Methods("POST")
 
