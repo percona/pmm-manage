@@ -14,8 +14,8 @@ scrape_configs:
 
   - job_name: linux
     basic_auth:
-      username: ENV_SERVER_USER
-      password: ENV_SERVER_PASSWORD
+      username: pmm
+      password: pmm
 
     tls_config:
       insecure_skip_verify: true
@@ -43,8 +43,8 @@ scrape_configs:
 
   - job_name: proxysql
     basic_auth:
-      username: ENV_SERVER_USER
-      password: ENV_SERVER_PASSWORD
+      username: pmm
+      password: pmm
 
     tls_config:
       insecure_skip_verify: true
@@ -67,8 +67,8 @@ scrape_configs:
 
   - job_name: mongodb
     basic_auth:
-      username: ENV_SERVER_USER
-      password: ENV_SERVER_PASSWORD
+      username: pmm
+      password: pmm
 
     tls_config:
       insecure_skip_verify: true
@@ -96,8 +96,8 @@ scrape_configs:
   - job_name: mysql-hr
     metrics_path: /metrics-hr
     basic_auth:
-      username: ENV_SERVER_USER
-      password: ENV_SERVER_PASSWORD
+      username: pmm
+      password: pmm
 
     tls_config:
       insecure_skip_verify: true
@@ -125,8 +125,8 @@ scrape_configs:
     scrape_interval:    5s
     scrape_timeout:     1s
     basic_auth:
-      username: ENV_SERVER_USER
-      password: ENV_SERVER_PASSWORD
+      username: pmm
+      password: pmm
 
     tls_config:
       insecure_skip_verify: true
@@ -154,8 +154,8 @@ scrape_configs:
     scrape_interval:   60s
     scrape_timeout:     5s
     basic_auth:
-      username: ENV_SERVER_USER
-      password: ENV_SERVER_PASSWORD
+      username: pmm
+      password: pmm
 
     tls_config:
       insecure_skip_verify: true

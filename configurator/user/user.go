@@ -44,10 +44,13 @@ func CreateUser(newUser PMMUser) (string, error) { // nolint: gocyclo
 }
 
 // DeleteUser from Grafana and .htpasswd
-// TODO: check user in Prometheus and replace to default if needed
 func DeleteUser(username string) (string, error) {
 	if err := deleteGrafanaUser(username); err != nil {
 		return "Cannot remove Grafana user", err
+	}
+
+	if err := resetPrometheusUser(); err != nil {
+		return "Cannot reset Prometheus user", err
 	}
 
 	if err := deleteHTTPUser(username); err != nil {
