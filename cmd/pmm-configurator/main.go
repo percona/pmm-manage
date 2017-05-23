@@ -8,6 +8,8 @@ import (
 	"github.com/gorilla/mux"
 	"io"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 var c config.PMMConfig
@@ -61,7 +63,8 @@ func returnError(w http.ResponseWriter, req *http.Request, httpStatus int, title
 	}
 
 	responseJSON, _ := json.Marshal(response)
-	log.Errorf("%s %s: %s", req.Method, req.URL.String(), responseJSON)
+	responseJSONQuoted := strings.Trim(strconv.Quote(string(responseJSON)), "\"")
+	log.Errorf("%s %s: %s", req.Method, req.URL.String(), responseJSONQuoted)
 
 	http.Error(w, string(responseJSON)+"\n", httpStatus)
 }
