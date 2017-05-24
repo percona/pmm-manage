@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/Percona-Lab/pmm-manage/configurator/config"
+	"github.com/fatih/structs"
 	"regexp"
 	"strings"
 )
@@ -40,6 +41,10 @@ func CreateUser(newUser PMMUser) (string, error) { // nolint: gocyclo
 		return "Cannot set HTTP password", err
 	}
 
+	if err := PMMConfig.AddUser(structs.Map(newUser)); err != nil {
+		return "Cannot save configuration file", err
+	}
+
 	return "success", nil
 }
 
@@ -55,6 +60,10 @@ func DeleteUser(username string) (string, error) {
 
 	if err := deleteHTTPUser(username); err != nil {
 		return "Cannot remove HTTP user", err
+	}
+
+	if err := PMMConfig.DeleteUser(username); err != nil {
+		return "Cannot save configuration file", err
 	}
 
 	return "success", nil

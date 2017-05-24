@@ -100,13 +100,13 @@ func (c *PMMConfig) parseConfig() {
 }
 
 // Save dump configuration values to configuration file
-func (c *PMMConfig) Save() {
+func (c *PMMConfig) Save() error {
 	bytes, err := yaml.Marshal(c)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"error": err,
 		}).Error("Cannot encode configuration")
-		return
+		return err
 	}
 
 	if err = ioutil.WriteFile(c.ConfigPath, bytes, 0644); err != nil {
@@ -114,8 +114,9 @@ func (c *PMMConfig) Save() {
 			"file":  c.ConfigPath,
 			"error": err,
 		}).Error("Cannot save configuration file")
-		return
+		return err
 	}
+	return nil
 }
 
 func (c *PMMConfig) setLogger() {
