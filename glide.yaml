@@ -1,0 +1,24 @@
+package: github.com/Percona-Lab/pmm-manage
+import:
+- package: github.com/Sirupsen/logrus
+  version: ^0.11.5
+- package: github.com/fatih/structs
+  version: ^1.0.0
+- package: github.com/foomo/htpasswd
+- package: github.com/go-logfmt/logfmt
+  version: ^0.3.0
+- package: github.com/gorilla/mux
+  version: ^1.4.0
+- package: github.com/grafana/grafana
+  version: ^4.3.1
+  subpackages:
+  - pkg/util
+- package: github.com/mattn/go-sqlite3
+  version: ^1.2.0
+- package: golang.org/x/crypto
+  subpackages:
+  - ssh
+- package: golang.org/x/sys
+  subpackages:
+  - unix
+- package: gopkg.in/yaml.v2

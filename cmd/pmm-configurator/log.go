@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"gopkg.in/logfmt.v0"
+	"github.com/go-logfmt/logfmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
