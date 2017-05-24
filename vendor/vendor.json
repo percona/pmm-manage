@@ -14,6 +14,12 @@
 			"revisionTime": "2017-03-08T20:36:35Z"
 		},
 		{
+			"checksumSHA1": "40Ns85VYa4smQPcewZ7SOdfLnKU=",
+			"path": "github.com/fatih/structs",
+			"revision": "a720dfa8df582c51dee1b36feabb906bde1588bd",
+			"revisionTime": "2017-01-03T08:10:50Z"
+		},
+		{
 			"checksumSHA1": "8tr/0BcOdw8cLmhJy7nd+QIzlA0=",
 			"path": "github.com/foomo/htpasswd",
 			"revision": "5c693a30dfc9ed2dda015a0759a5572fa0f53fca",
