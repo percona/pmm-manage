@@ -6,8 +6,8 @@ grafana-db-path: ./tests/sandbox/grafana.db
 prometheus-conf-path: ./tests/sandbox/prometheus.yml
 update-dir-path: ./tests/sandbox
 log-file: ./tests/sandbox/pmm-manage.log
-configuration:
-  skip-prometheus-reload: "true"
+skip-prometheus-reload: "true"
+configuration: {}
 users:
 - password: pass1word
   username: user1name
