@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Percona-Lab/pmm-manage/configurator/user"
-	"github.com/gorilla/mux"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/percona/pmm-manage/configurator/user"
 )
 
 func returnUser(w http.ResponseWriter, req *http.Request, username string) {

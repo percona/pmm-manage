@@ -1,10 +1,11 @@
 package user
 
 import (
-	"github.com/Percona-Lab/pmm-manage/configurator/config"
-	"github.com/fatih/structs"
 	"regexp"
 	"strings"
+
+	"github.com/fatih/structs"
+	"github.com/percona/pmm-manage/configurator/config"
 )
 
 // PMMConfig pass configuration via global variable :'(

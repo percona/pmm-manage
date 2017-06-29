@@ -16,6 +16,6 @@ PMM Manage provides several key features:
 ## Building
 ```
 export GOPATH=$(pwd)
-go get github.com/Percona-Lab/pmm-manage/cmd/pmm-configurator
+go get -u github.com/percona/pmm-manage/cmd/pmm-configurator
 ls -la bin/pmm-configurator
 ```

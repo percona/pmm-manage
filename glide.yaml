@@ -1,4 +1,4 @@
-package: github.com/Percona-Lab/pmm-manage
+package: github.com/percona/pmm-manage
 import:
 - package: github.com/Sirupsen/logrus
   version: ^0.11.5
