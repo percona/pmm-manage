@@ -1,0 +1,12 @@
+dist: trusty
+sudo: required
+language: go
+
+go:
+  - 1.8.x
+  - tip
+
+install: true
+
+script:
+  go install -v ./cmd/...
