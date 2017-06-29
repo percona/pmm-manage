@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/Percona-Lab/pmm-manage/configurator/config"
-	"github.com/Percona-Lab/pmm-manage/configurator/user"
 	log "github.com/Sirupsen/logrus"
+	"github.com/percona/pmm-manage/configurator/config"
+	"github.com/percona/pmm-manage/configurator/user"
 )
 
 var c config.PMMConfig
