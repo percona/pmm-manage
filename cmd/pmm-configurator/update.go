@@ -139,7 +139,7 @@ func returnLog(w http.ResponseWriter, req *http.Request, timestamp string, httpS
 		updateState = "in-progress"
 	}
 
-	location := fmt.Sprintf("http://%s%s/v1/updates/%s", req.Host, c.PathPrefix, timestamp)
+	location := fmt.Sprintf("%s/v1/updates/%s", c.PathPrefix, timestamp)
 	w.Header().Set("Location", location)
 	w.WriteHeader(httpStatus)
 
