@@ -2,12 +2,14 @@ package config
 
 import (
 	"flag"
-	log "github.com/Sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"os"
 	"reflect"
+	"strings"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 // PMMConfig implements struct with all configuration params in one place
@@ -51,6 +53,7 @@ func ParseConfig() (c PMMConfig) {
 	flag.Parse() // command line should overide config
 	c.setDefaultValues()
 	c.setLogger()
+	c.validateValues()
 
 	return c
 }
@@ -129,5 +132,12 @@ func (c *PMMConfig) setLogger() {
 		}).Error("Failed to log to file, using default stderr")
 	} else {
 		log.SetOutput(io.MultiWriter(logFile, os.Stderr))
+	}
+}
+
+func (c *PMMConfig) validateValues() {
+	if len(c.PathPrefix) > 0 && !strings.HasPrefix(c.PathPrefix, "/") {
+		c.PathPrefix = "/" + c.PathPrefix
+		log.Warning("Prefix has been changed to " + c.PathPrefix)
 	}
 }
