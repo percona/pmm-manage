@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -11,9 +10,12 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func isPidAlive(pid int) bool {
@@ -87,6 +89,7 @@ func getUpdateListHandler(w http.ResponseWriter, req *http.Request) {
 	for k := range updateList {
 		keys = append(keys, k)
 	}
+	sort.Strings(keys)
 
 	json.NewEncoder(w).Encode(keys) // nolint: errcheck
 }
