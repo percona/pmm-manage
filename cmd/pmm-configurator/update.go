@@ -134,9 +134,16 @@ func returnLog(w http.ResponseWriter, req *http.Request, timestamp string, httpS
 		return
 	}
 
-	updateState := "finished"
+	var updateState string
 	if isPidAlive(pidInt) {
-		updateState = "in-progress"
+		updateState = "running"
+	} else {
+		re = regexp.MustCompile(`localhost .* failed=0\s`)
+		if re.MatchString(string(fileContent)) {
+			updateState = "succeeded"
+		} else {
+			updateState = "failed"
+		}
 	}
 
 	location := fmt.Sprintf("%s/v1/updates/%s", c.PathPrefix, timestamp)
