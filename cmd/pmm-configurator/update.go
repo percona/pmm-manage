@@ -18,6 +18,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var pidRegexp = regexp.MustCompile(`PID: (\d+)`)
+var resultRegexp = regexp.MustCompile(`localhost .* failed=0\s`)
+var timeRegexp = regexp.MustCompile(`__(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).log`)
+
 func isPidAlive(pid int) bool {
 	if err := syscall.Kill(pid, syscall.Signal(0x0)); err == nil {
 		return true
@@ -58,11 +62,6 @@ func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
 func readUpdateList() (map[string]string, error) {
 	result := make(map[string]string)
 
-	r, err := regexp.Compile(`__(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).log$`)
-	if err != nil {
-		return result, err
-	}
-
 	logPath := path.Join(c.UpdateDirPath, "log")
 	files, err := ioutil.ReadDir(logPath)
 	if err != nil {
@@ -70,7 +69,7 @@ func readUpdateList() (map[string]string, error) {
 	}
 
 	for _, f := range files {
-		if match := r.FindStringSubmatch(f.Name()); len(match) == 2 {
+		if match := timeRegexp.FindStringSubmatch(f.Name()); len(match) == 2 {
 			result[match[1]] = f.Name()
 		}
 	}
@@ -119,13 +118,7 @@ func returnLog(w http.ResponseWriter, req *http.Request, timestamp string, httpS
 		return
 	}
 
-	re, err := regexp.Compile(`PID: (\d+)`)
-	if err != nil {
-		returnError(w, req, http.StatusInternalServerError, "Cannot find PID in update log", err)
-		return
-	}
-
-	match := re.FindStringSubmatch(string(fileContent))
+	match := pidRegexp.FindStringSubmatch(string(fileContent))
 	if len(match) != 2 {
 		returnError(w, req, http.StatusInternalServerError, "Cannot find PID in update log", nil)
 		return
@@ -141,8 +134,7 @@ func returnLog(w http.ResponseWriter, req *http.Request, timestamp string, httpS
 	if isPidAlive(pidInt) {
 		updateState = "running"
 	} else {
-		re = regexp.MustCompile(`localhost .* failed=0\s`)
-		if re.MatchString(string(fileContent)) {
+		if resultRegexp.MatchString(string(fileContent)) {
 			updateState = "succeeded"
 		} else {
 			updateState = "failed"
@@ -204,12 +196,7 @@ func getCurrentUpdate() (string, int, error) {
 		return "", -1, err
 	}
 
-	re, err := regexp.Compile(`__(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).log:`)
-	if err != nil {
-		return "", -1, err
-	}
-
-	match := re.FindStringSubmatch(string(currentLogOutput))
+	match := timeRegexp.FindStringSubmatch(string(currentLogOutput))
 	if len(match) != 2 {
 		return "", -1, err
 	}
