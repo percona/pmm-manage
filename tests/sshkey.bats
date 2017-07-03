@@ -46,7 +46,7 @@
     [[ "$status" -eq 0 ]]
     [[ "$output" =~ '"type":"ssh-rsa"' ]]
     if [[ "$DIGEST" =~ "SHA256:" ]]; then
-        [[ "$output" =~ "\"fin1gerprint\":\"$DIGEST\"" ]]
+        [[ "$output" =~ "\"fingerprint\":\"$DIGEST\"" ]]
     fi
 }
 
