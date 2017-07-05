@@ -1,7 +1,7 @@
 package: github.com/percona/pmm-manage
 import:
-- package: github.com/Sirupsen/logrus
-  version: ^0.11.5
+- package: github.com/sirupsen/logrus
+  version: ^1.0.0
 - package: github.com/fatih/structs
   version: ^1.0.0
 - package: github.com/foomo/htpasswd

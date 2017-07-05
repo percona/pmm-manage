@@ -7,8 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/percona/pmm-manage/configurator/config"
 	"github.com/percona/pmm-manage/configurator/user"
 )

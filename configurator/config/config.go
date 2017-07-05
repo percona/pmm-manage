@@ -2,14 +2,14 @@ package config
 
 import (
 	"flag"
-	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 )
 
 // PMMConfig implements struct with all configuration params in one place

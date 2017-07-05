@@ -3,9 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/sys/unix"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -13,6 +10,10 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/sys/unix"
 )
 
 func runSSHKeyChecks() {
