@@ -1,6 +1,9 @@
 package sshkey
 
 import (
+	"encoding/json"
+	"io"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"path"
@@ -60,4 +63,32 @@ func ParseSSHKey(authorizedKey []byte) (SSHKey, error) {
 		Comment:     comment,
 		Fingerprint: ssh.FingerprintSHA256(pubKey),
 	}, err
+}
+
+func WriteSSHKey(body io.ReadCloser) (SSHKey, string, error) {
+	var newSSHKey SSHKey
+	if err := json.NewDecoder(body).Decode(&newSSHKey); err != nil {
+		return newSSHKey, "Cannot parse json", err
+	}
+
+	parsedSSHKey, err := ParseSSHKey([]byte(newSSHKey.Key))
+	if err != nil {
+		return parsedSSHKey, "Cannot parse ssh key", err
+	}
+
+	if err = ioutil.WriteFile(PMMConfig.SSHKeyPath, []byte(newSSHKey.Key), 0600); err != nil {
+		return parsedSSHKey, "Cannot create authorized_keys file", err
+	}
+
+	sshKeyUser, err := user.Lookup(PMMConfig.SSHKeyOwner)
+	if err != nil {
+		return parsedSSHKey, "Cannot lookup owner for authorized_keys file", err
+	}
+	uid, _ := strconv.Atoi(sshKeyUser.Uid)
+	gid, _ := strconv.Atoi(sshKeyUser.Gid)
+	if err := os.Chown(PMMConfig.SSHKeyPath, uid, gid); err != nil {
+		return parsedSSHKey, "Cannot change owner for authorized_keys file", err
+	}
+
+	return parsedSSHKey, "success", nil
 }
