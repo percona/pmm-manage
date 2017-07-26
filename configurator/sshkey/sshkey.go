@@ -9,6 +9,7 @@ import (
 
 	"github.com/percona/pmm-manage/configurator/config"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/ssh"
 	"golang.org/x/sys/unix"
 )
 
@@ -47,4 +48,16 @@ func RunSSHKeyChecks() {
 			"error": err,
 		}).Fatal("Cannot write to ssh directory")
 	}
+}
+
+func ParseSSHKey(authorizedKey []byte) (SSHKey, error) {
+	pubKey, comment, _, _, err := ssh.ParseAuthorizedKey(authorizedKey)
+	if err != nil {
+		return SSHKey{}, err
+	}
+	return SSHKey{
+		Type:        pubKey.Type(),
+		Comment:     comment,
+		Fingerprint: ssh.FingerprintSHA256(pubKey),
+	}, err
 }
