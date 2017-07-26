@@ -65,6 +65,18 @@ func ParseSSHKey(authorizedKey []byte) (SSHKey, error) {
 	}, err
 }
 
+func ReadSSHKey() (SSHKey, string, error) {
+	authorizedKey, err := ioutil.ReadFile(PMMConfig.SSHKeyPath)
+	if err != nil {
+		return SSHKey{}, "Cannot read ssh key", err
+	}
+	sshKey, err := ParseSSHKey(authorizedKey)
+	if err != nil {
+		return sshKey, "Cannot parse ssh key", err
+	}
+	return sshKey, "success", nil
+}
+
 func WriteSSHKey(body io.ReadCloser) (SSHKey, string, error) {
 	var newSSHKey SSHKey
 	if err := json.NewDecoder(body).Decode(&newSSHKey); err != nil {
