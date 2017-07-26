@@ -3,24 +3,18 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/percona/pmm-manage/configurator/sshkey"
 )
 
 func getSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
-	authorizedKey, err := ioutil.ReadFile(c.SSHKeyPath)
-	if err != nil {
-		returnError(w, req, http.StatusInternalServerError, "Cannot read ssh key", err)
-		return
+	parsedSSHKey, result, err := sshkey.ReadSSHKey()
+	if result != "success" {
+		returnError(w, req, http.StatusInternalServerError, result, err)
+	} else {
+		json.NewEncoder(w).Encode(parsedSSHKey) // nolint: errcheck
 	}
-	sshKey, err := sshkey.ParseSSHKey(authorizedKey)
-	if err != nil {
-		returnError(w, req, http.StatusInternalServerError, "Cannot parse ssh key", err)
-		return
-	}
-	json.NewEncoder(w).Encode(sshKey) // nolint: errcheck
 }
 
 func setSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
