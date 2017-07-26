@@ -53,7 +53,7 @@ func RunSSHKeyChecks() {
 	}
 }
 
-func ParseSSHKey(authorizedKey []byte) (SSHKey, error) {
+func parseSSHKey(authorizedKey []byte) (SSHKey, error) {
 	pubKey, comment, _, _, err := ssh.ParseAuthorizedKey(authorizedKey)
 	if err != nil {
 		return SSHKey{}, err
@@ -70,7 +70,7 @@ func ReadSSHKey() (SSHKey, string, error) {
 	if err != nil {
 		return SSHKey{}, "Cannot read ssh key", err
 	}
-	sshKey, err := ParseSSHKey(authorizedKey)
+	sshKey, err := parseSSHKey(authorizedKey)
 	if err != nil {
 		return sshKey, "Cannot parse ssh key", err
 	}
@@ -83,7 +83,7 @@ func WriteSSHKey(body io.ReadCloser) (SSHKey, string, error) {
 		return newSSHKey, "Cannot parse json", err
 	}
 
-	parsedSSHKey, err := ParseSSHKey([]byte(newSSHKey.Key))
+	parsedSSHKey, err := parseSSHKey([]byte(newSSHKey.Key))
 	if err != nil {
 		return parsedSSHKey, "Cannot parse ssh key", err
 	}
