@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
-	"os/user"
-	"strconv"
 
 	"github.com/percona/pmm-manage/configurator/sshkey"
 )
@@ -27,35 +24,13 @@ func getSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func setSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
-	var newSSHKey sshkey.SSHKey
-	if err := json.NewDecoder(req.Body).Decode(&newSSHKey); err != nil {
-		returnError(w, req, http.StatusBadRequest, "Cannot parse json", err)
-		return
+	parsedSSHKey, result, err := sshkey.WriteSSHKey(req.Body)
+	if result != "success" {
+		returnError(w, req, http.StatusInternalServerError, result, err)
+	} else {
+		location := fmt.Sprintf("http://%s%s", req.Host, req.URL.String())
+		w.Header().Set("Location", location)
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(parsedSSHKey) // nolint: errcheck
 	}
-
-	parsedSSHKey, err := sshkey.ParseSSHKey([]byte(newSSHKey.Key))
-	if err != nil {
-		returnError(w, req, http.StatusBadRequest, "Cannot parse ssh key", err)
-		return
-	}
-
-	if err = ioutil.WriteFile(c.SSHKeyPath, []byte(newSSHKey.Key), 0600); err != nil {
-		returnError(w, req, http.StatusInternalServerError, "Cannot create authorized_keys file", err)
-		return
-	}
-
-	sshKeyUser, err := user.Lookup(c.SSHKeyOwner)
-	if err != nil {
-		returnError(w, req, http.StatusInternalServerError, "Cannot lookup owner for authorized_keys file", err)
-	}
-	uid, _ := strconv.Atoi(sshKeyUser.Uid)
-	gid, _ := strconv.Atoi(sshKeyUser.Gid)
-	if err := os.Chown(c.SSHKeyPath, uid, gid); err != nil {
-		returnError(w, req, http.StatusInternalServerError, "Cannot change owner for authorized_keys file", err)
-	}
-
-	location := fmt.Sprintf("http://%s%s", req.Host, req.URL.String())
-	w.Header().Set("Location", location)
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(parsedSSHKey) // nolint: errcheck
 }
