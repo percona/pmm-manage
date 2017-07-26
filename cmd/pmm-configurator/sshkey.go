@@ -7,55 +7,18 @@ import (
 	"net/http"
 	"os"
 	"os/user"
-	"path"
-	"path/filepath"
 	"strconv"
 
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/sys/unix"
+	"github.com/percona/pmm-manage/configurator/sshkey"
 )
 
-func runSSHKeyChecks() {
-	sshKeyUser, err := user.Lookup(c.SSHKeyOwner)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if c.SSHKeyPath == "" {
-		c.SSHKeyPath = path.Join(sshKeyUser.HomeDir, ".ssh/authorized_keys")
-	}
-
-	sshKeyDir := filepath.Dir(c.SSHKeyPath)
-	if dir, err := os.Stat(sshKeyDir); err != nil || !dir.IsDir() {
-		if err := os.MkdirAll(sshKeyDir, 0700); err != nil {
-			log.WithFields(log.Fields{
-				"dir":   sshKeyDir,
-				"error": err,
-			}).Fatal("Cannot create ssh directory")
-		}
-		uid, _ := strconv.Atoi(sshKeyUser.Uid)
-		gid, _ := strconv.Atoi(sshKeyUser.Gid)
-		if err := os.Chown(sshKeyDir, uid, gid); err != nil {
-			log.WithFields(log.Fields{
-				"dir":   sshKeyDir,
-				"error": err,
-			}).Fatal("Cannot change owner of ssh directory")
-		}
-	}
-	if err := unix.Access(sshKeyDir, unix.W_OK); err != nil {
-		log.WithFields(log.Fields{
-			"dir":   sshKeyDir,
-			"error": err,
-		}).Fatal("Cannot write to ssh directory")
-	}
-}
-
-func parseSSHKey(authorizedKey []byte) (sshkey, error) {
+func parseSSHKey(authorizedKey []byte) (sshkey.SSHKey, error) {
 	pubKey, comment, _, _, err := ssh.ParseAuthorizedKey(authorizedKey)
 	if err != nil {
-		return sshkey{}, err
+		return sshkey.SSHKey{}, err
 	}
-	return sshkey{
+	return sshkey.SSHKey{
 		Type:        pubKey.Type(),
 		Comment:     comment,
 		Fingerprint: ssh.FingerprintSHA256(pubKey),
@@ -77,7 +40,7 @@ func getSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func setSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
-	var newSSHKey sshkey
+	var newSSHKey sshkey.SSHKey
 	if err := json.NewDecoder(req.Body).Decode(&newSSHKey); err != nil {
 		returnError(w, req, http.StatusBadRequest, "Cannot parse json", err)
 		return
