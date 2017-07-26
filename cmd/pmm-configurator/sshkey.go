@@ -9,21 +9,8 @@ import (
 	"os/user"
 	"strconv"
 
-	"golang.org/x/crypto/ssh"
 	"github.com/percona/pmm-manage/configurator/sshkey"
 )
-
-func parseSSHKey(authorizedKey []byte) (sshkey.SSHKey, error) {
-	pubKey, comment, _, _, err := ssh.ParseAuthorizedKey(authorizedKey)
-	if err != nil {
-		return sshkey.SSHKey{}, err
-	}
-	return sshkey.SSHKey{
-		Type:        pubKey.Type(),
-		Comment:     comment,
-		Fingerprint: ssh.FingerprintSHA256(pubKey),
-	}, err
-}
 
 func getSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
 	authorizedKey, err := ioutil.ReadFile(c.SSHKeyPath)
@@ -31,7 +18,7 @@ func getSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
 		returnError(w, req, http.StatusInternalServerError, "Cannot read ssh key", err)
 		return
 	}
-	sshKey, err := parseSSHKey(authorizedKey)
+	sshKey, err := sshkey.ParseSSHKey(authorizedKey)
 	if err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot parse ssh key", err)
 		return
@@ -46,7 +33,7 @@ func setSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	parsedSSHKey, err := parseSSHKey([]byte(newSSHKey.Key))
+	parsedSSHKey, err := sshkey.ParseSSHKey([]byte(newSSHKey.Key))
 	if err != nil {
 		returnError(w, req, http.StatusBadRequest, "Cannot parse ssh key", err)
 		return
