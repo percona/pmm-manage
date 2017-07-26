@@ -11,6 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/percona/pmm-manage/configurator/config"
+	"github.com/percona/pmm-manage/configurator/sshkey"
 	"github.com/percona/pmm-manage/configurator/user"
 )
 
@@ -19,7 +20,8 @@ var c config.PMMConfig
 func main() {
 	c = config.ParseConfig()
 	user.PMMConfig = c
-	runSSHKeyChecks()
+	sshkey.PMMConfig = c
+	sshkey.RunSSHKeyChecks()
 
 	router := mux.NewRouter().PathPrefix(c.PathPrefix).Subrouter()
 	router.HandleFunc("/v1/logs", getLogFileHandler).Methods("GET")
