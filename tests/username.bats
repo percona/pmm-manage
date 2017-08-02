@@ -18,19 +18,6 @@ get_input() {
     echo "input: {\"username\": \"${USERNAME}\", \"password\": \"${PASSWORD}\"}" >&2
 }
 
-@test "usual username" {
-    run curl \
-        -s \
-        -X POST \
-        --insecure \
-        -d "$(get_input 'random!user' 'pass!word')" \
-        "${SUT}/${URL_PREFIX}/v1/users"
-    echo "$output" >&2
-
-    [[ "$status" -eq 0 ]]
-    [[ "$output" = '{"username":"random!user","password":"********"}' ]]
-}
-
 @test ": symbol in username" {
     run curl \
         -s \
