@@ -1,6 +1,8 @@
 package user
 
 import (
+	"os"
+
 	"github.com/foomo/htpasswd"
 )
 
@@ -21,5 +23,17 @@ func createHTTPUser(newUser PMMUser) error {
 }
 
 func deleteHTTPUser(username string) error {
-	return htpasswd.RemoveUser(PMMConfig.HtpasswdPath, username)
+	if err := htpasswd.RemoveUser(PMMConfig.HtpasswdPath, username); err != nil {
+		return err
+	}
+
+	fi, err := os.Stat(PMMConfig.HtpasswdPath)
+	if err != nil {
+		return err
+	}
+
+	if fi.Size() == 0 {
+		return os.Remove(PMMConfig.HtpasswdPath)
+	}
+	return nil
 }

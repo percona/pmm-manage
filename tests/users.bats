@@ -244,9 +244,11 @@ setup() {
         skip "can be checked only locally"
     fi
 
-    run grep "${USERNAME}:" "${BATS_TEST_DIRNAME}/sandbox/htpasswd"
-    echo "$output" >&2
-    [[ "$status" -eq 1 ]]
+    if [ -f "${BATS_TEST_DIRNAME}/sandbox/htpasswd" ]; then
+        run grep "${USERNAME}:" "${BATS_TEST_DIRNAME}/sandbox/htpasswd"
+        echo "$output" >&2
+        [[ "$status" -eq 1 ]]
+    fi
 }
 
 @test "check deleted config" {
