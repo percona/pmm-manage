@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-[ -z "$SUT" ] && SUT='127.0.0.1:7777' || :
+[ -z "$SUT" ] && SUT='http://127.0.0.1:7777' || :
 [ -z "$URL_PREFIX" ] && URL_PREFIX='configurator' || :
 
 @test "prepare" {
@@ -17,8 +17,9 @@
     run curl \
         -s \
         -X POST \
+        --insecure \
         -d "{\"Key\": \"${KEY}\"}" \
-        http://${SUT}/${URL_PREFIX}/v1/sshkey
+        ${SUT}/${URL_PREFIX}/v1/sshkey
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -39,8 +40,9 @@
     run curl \
         -s \
         -X GET \
+        --insecure \
         -d '' \
-        http://${SUT}/${URL_PREFIX}/v1/sshkey
+        ${SUT}/${URL_PREFIX}/v1/sshkey
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]

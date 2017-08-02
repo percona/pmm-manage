@@ -2,7 +2,7 @@
 
 setup() {
     [ -z "$SUT" ] \
-        && export SUT='127.0.0.1:7777' || :
+        && export SUT='http://127.0.0.1:7777' || :
     [ -z "$URL_PREFIX" ] \
         && export URL_PREFIX='configurator' || :
 
@@ -22,8 +22,9 @@ get_input() {
     run curl \
         -s \
         -X POST \
+        --insecure \
         -d "$(get_input 'random!user' 'pass!word')" \
-        "http://${SUT}/${URL_PREFIX}/v1/users"
+        "${SUT}/${URL_PREFIX}/v1/users"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -34,8 +35,9 @@ get_input() {
     run curl \
         -s \
         -X POST \
+        --insecure \
         -d "$(get_input 'random:user' 'pass!word')" \
-        "http://${SUT}/${URL_PREFIX}/v1/users"
+        "${SUT}/${URL_PREFIX}/v1/users"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -46,8 +48,9 @@ get_input() {
     run curl \
         -s \
         -X POST \
+        --insecure \
         -d "$(get_input 'random#user' 'pass!word')" \
-        "http://${SUT}/${URL_PREFIX}/v1/users"
+        "${SUT}/${URL_PREFIX}/v1/users"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -58,8 +61,9 @@ get_input() {
     run curl \
         -s \
         -X POST \
+        --insecure \
         -d "$(get_input '' 'pass!word')" \
-        "http://${SUT}/${URL_PREFIX}/v1/users"
+        "${SUT}/${URL_PREFIX}/v1/users"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -72,8 +76,9 @@ get_input() {
     run curl \
         -s \
         -X POST \
+        --insecure \
         -d "$(get_input 'random!user' '')" \
-        "http://${SUT}/${URL_PREFIX}/v1/users"
+        "${SUT}/${URL_PREFIX}/v1/users"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -84,8 +89,9 @@ get_input() {
     run curl \
         -s \
         -X POST \
+        --insecure \
         -d "$(get_input '1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111' 'pass!word')" \
-        "http://${SUT}/${URL_PREFIX}/v1/users"
+        "${SUT}/${URL_PREFIX}/v1/users"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -98,8 +104,9 @@ get_input() {
     run curl \
         -s \
         -X POST \
+        --insecure \
         -d "$(get_input 'random!user' '1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111')" \
-        "http://${SUT}/${URL_PREFIX}/v1/users"
+        "${SUT}/${URL_PREFIX}/v1/users"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -112,8 +119,9 @@ get_input() {
     run curl \
         -s \
         -X POST \
+        --insecure \
         -d "$(get_input '!random!user' 'pass!word')" \
-        "http://${SUT}/${URL_PREFIX}/v1/users"
+        "${SUT}/${URL_PREFIX}/v1/users"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -126,8 +134,9 @@ get_input() {
     run curl \
         -s \
         -X POST \
+        --insecure \
         -d "$(get_input 'random!user' '!pass!word')" \
-        "http://${SUT}/${URL_PREFIX}/v1/users"
+        "${SUT}/${URL_PREFIX}/v1/users"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
