@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-[ -z "$SUT" ] && SUT='127.0.0.1:7777' || :
+[ -z "$SUT" ] && SUT='http://127.0.0.1:7777' || :
 [ -z "$URL_PREFIX" ] && URL_PREFIX='configurator' || :
 
 @test "prepare" {
@@ -18,7 +18,8 @@
     run curl \
         -s \
         -X GET \
-        "http://${SUT}/${URL_PREFIX}/v1/updates"
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v1/updates"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -32,7 +33,8 @@
     run curl \
         -s \
         -X GET \
-        "http://${SUT}/${URL_PREFIX}/v1/updates/0000-00-00T00:00:00"
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v1/updates/0000-00-00T00:00:00"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -43,7 +45,8 @@
     run curl \
         -s \
         -X GET \
-        "http://${SUT}/${URL_PREFIX}/v1/updates/0000-00-00T00:00:01"
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v1/updates/0000-00-00T00:00:01"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -54,7 +57,8 @@
     run curl \
         -s \
         -X GET \
-        "http://${SUT}/${URL_PREFIX}/v1/updates/0000-00-00T00:00:02"
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v1/updates/0000-00-00T00:00:02"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]

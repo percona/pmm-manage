@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-[ -z "$SUT" ] && SUT='127.0.0.1:7777' || :
+[ -z "$SUT" ] && SUT='http://127.0.0.1:7777' || :
 [ -z "$URL_PREFIX" ] && URL_PREFIX='configurator' || :
 
 setup() {
@@ -20,7 +20,8 @@ setup() {
         -s \
         -X POST \
         -d "${INPUT1}" \
-        "http://${SUT}/${URL_PREFIX}/v1/users"
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v1/users"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -31,8 +32,9 @@ setup() {
     run curl \
         -s \
         -X GET \
+        --insecure \
         -d '' \
-        "http://${SUT}/${URL_PREFIX}/v1/users/${USERNAME}"
+        "${SUT}/${URL_PREFIX}/v1/users/${USERNAME}"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -43,8 +45,9 @@ setup() {
     run curl \
         -s \
         -X GET \
+        --insecure \
         -d '' \
-        http://${SUT}/${URL_PREFIX}/v1/users
+        "${SUT}/${URL_PREFIX}/v1/users"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -104,8 +107,9 @@ setup() {
     run curl \
         -s \
         -X PATCH \
+        --insecure \
         -d "${INPUT2}" \
-        "http://${SUT}/${URL_PREFIX}/v1/users/${USERNAME}"
+        "${SUT}/${URL_PREFIX}/v1/users/${USERNAME}"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
@@ -164,8 +168,9 @@ setup() {
     run curl \
         -s \
         -X DELETE \
+        --insecure \
         -d '' \
-        "http://${SUT}/${URL_PREFIX}/v1/users/${USERNAME}"
+        "${SUT}/${URL_PREFIX}/v1/users/${USERNAME}"
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
