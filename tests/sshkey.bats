@@ -28,10 +28,11 @@
         [[ "$output" =~ "\"fingerprint\":\"$DIGEST\"" ]]
     fi
 
-    run diff -w "${BATS_TEST_DIRNAME}/sandbox/authorized_keys" "${BATS_TMPDIR}/id_rsa.pub"
-    echo "$output" >&2
-
-    [[ "$status" -eq 0 ]]
+    if [ -z "$REMOTE" ]; then
+        run diff -w "${BATS_TEST_DIRNAME}/sandbox/authorized_keys" "${BATS_TMPDIR}/id_rsa.pub"
+        echo "$output" >&2
+        [[ "$status" -eq 0 ]]
+    fi
 }
 
 @test "get sshkey" {

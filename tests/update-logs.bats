@@ -15,6 +15,10 @@
 }
 
 @test "list updates" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     run curl \
         -s \
         -X GET \
@@ -27,6 +31,10 @@
 }
 
 @test "get running" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     printf "PID: $$\n" \
         > "${BATS_TEST_DIRNAME}/sandbox/log/00-running__0000-00-00T00:00:00.log"
 
@@ -42,6 +50,10 @@
 }
 
 @test "get succeeded" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     run curl \
         -s \
         -X GET \
@@ -54,6 +66,10 @@
 }
 
 @test "get failed" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     run curl \
         -s \
         -X GET \

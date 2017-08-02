@@ -34,6 +34,7 @@ setup() {
         -X GET \
         --insecure \
         -d '' \
+        --user "${USERNAME}:${PASSWORD1}" \
         "${SUT}/${URL_PREFIX}/v1/users/${USERNAME}"
     echo "$output" >&2
 
@@ -47,6 +48,7 @@ setup() {
         -X GET \
         --insecure \
         -d '' \
+        --user "${USERNAME}:${PASSWORD1}" \
         "${SUT}/${URL_PREFIX}/v1/users"
     echo "$output" >&2
 
@@ -55,6 +57,10 @@ setup() {
 }
 
 @test "check grafana user 1" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     run sqlite3 "${BATS_TEST_DIRNAME}/sandbox/grafana.db" "SELECT salt FROM user WHERE login='${USERNAME}';"
     [[ "$status" -eq 0 ]]
     local SALT="$output"
@@ -72,6 +78,10 @@ setup() {
 }
 
 @test "check prometheus user 1" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     grep "^      username: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
     run grep "^      username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
     [[ "$status" -eq 0 ]]
@@ -82,6 +92,10 @@ setup() {
 }
 
 @test "check http user 1" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     run htpasswd -csb "${BATS_TMPDIR}/htpasswd" "${USERNAME}" "${PASSWORD1}"
     echo "$output" >&2
     [[ "$status" -eq 0 ]]
@@ -94,6 +108,10 @@ setup() {
 }
 
 @test "check config" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     grep "^  username: " "${BATS_TEST_DIRNAME}/sandbox/config.yml" >&2
     run grep "^  username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
     [[ "$status" -eq 0 ]]
@@ -109,6 +127,7 @@ setup() {
         -X PATCH \
         --insecure \
         -d "${INPUT2}" \
+        --user "${USERNAME}:${PASSWORD1}" \
         "${SUT}/${URL_PREFIX}/v1/users/${USERNAME}"
     echo "$output" >&2
 
@@ -117,6 +136,10 @@ setup() {
 }
 
 @test "check updated grafana user" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     run sqlite3 "${BATS_TEST_DIRNAME}/sandbox/grafana.db" "SELECT salt FROM user WHERE login='${USERNAME}';"
     [[ "$status" -eq 0 ]]
     local SALT="$output"
@@ -134,6 +157,10 @@ setup() {
 }
 
 @test "check updated prometheus user" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     grep "^      username: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
     run grep "^      username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
     [[ "$status" -eq 0 ]]
@@ -145,6 +172,10 @@ setup() {
 
 
 @test "check updated http user" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     run htpasswd -csb "${BATS_TMPDIR}/htpasswd" "${USERNAME}" "${PASSWORD2}"
     echo "$output" >&2
     [[ "$status" -eq 0 ]]
@@ -157,6 +188,10 @@ setup() {
 }
 
 @test "check updated config" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     run grep "^  username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
     [[ "$status" -eq 0 ]]
 
@@ -170,6 +205,7 @@ setup() {
         -X DELETE \
         --insecure \
         -d '' \
+        --user "${USERNAME}:${PASSWORD2}" \
         "${SUT}/${URL_PREFIX}/v1/users/${USERNAME}"
     echo "$output" >&2
 
@@ -178,6 +214,10 @@ setup() {
 }
 
 @test "check deleted grafana user" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     run sqlite3 "${BATS_TEST_DIRNAME}/sandbox/grafana.db" "SELECT login FROM user WHERE login='${USERNAME}';"
     echo "$output" >&2
     [[ "$status" -eq 0 ]]
@@ -185,6 +225,10 @@ setup() {
 }
 
 @test "check deleted prometheus user" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     grep "^      username: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
     run grep "^      username: pmm" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
     [[ "$status" -eq 0 ]]
@@ -196,12 +240,20 @@ setup() {
 
 
 @test "check deleted http user" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     run grep "${USERNAME}:" "${BATS_TEST_DIRNAME}/sandbox/htpasswd"
     echo "$output" >&2
     [[ "$status" -eq 1 ]]
 }
 
 @test "check deleted config" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
     run grep "^  username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
     [[ "$status" -ne 0 ]]
 
