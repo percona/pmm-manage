@@ -16,12 +16,13 @@ import (
 )
 
 var c config.PMMConfig
+var SSHKey sshkey.Handler
 
 func main() {
 	c = config.ParseConfig()
 	user.PMMConfig = c
-	sshkey.PMMConfig = c
-	sshkey.RunSSHKeyChecks()
+	SSHKey = sshkey.Init(c)
+	SSHKey.RunSSHKeyChecks()
 
 	router := mux.NewRouter().PathPrefix(c.PathPrefix).Subrouter()
 	router.HandleFunc("/v1/logs", getLogFileHandler).Methods("GET")
