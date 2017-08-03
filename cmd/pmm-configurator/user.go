@@ -44,7 +44,7 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 	} else if result != "success" {
 		returnError(w, req, http.StatusForbidden, result, nil)
 	} else {
-		location := fmt.Sprintf("http://%s%s/%s", req.Host, req.URL.String(), newUser.Username)
+		location := fmt.Sprintf("%s/%s", req.URL.String(), newUser.Username)
 		w.Header().Set("Location", location)
 		w.WriteHeader(http.StatusCreated)
 		returnUser(w, req, newUser.Username)
