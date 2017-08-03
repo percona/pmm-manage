@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/percona/pmm-manage/configurator/sshkey"
 )
 
 func getSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
-	parsedSSHKey, result, err := sshkey.ReadSSHKey()
+	parsedSSHKey, result, err := SSHKey.Read()
 	if result != "success" {
 		returnError(w, req, http.StatusInternalServerError, result, err)
 	} else {
@@ -18,7 +16,7 @@ func getSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func setSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
-	parsedSSHKey, result, err := sshkey.WriteSSHKey(req.Body)
+	parsedSSHKey, result, err := SSHKey.Write(req.Body)
 	if result != "success" {
 		returnError(w, req, http.StatusInternalServerError, result, err)
 	} else {
