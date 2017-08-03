@@ -37,22 +37,16 @@ func (c *Handler) RunSSHKeyChecks() {
 	logger := log.WithField("dir", sshKeyDir)
 	if dir, err := os.Stat(sshKeyDir); err != nil || !dir.IsDir() {
 		if err := os.MkdirAll(sshKeyDir+"/", 0700); err != nil {
-			logger.WithFields(log.Fields{
-				"error": err,
-			}).Fatal("Cannot create ssh directory")
+			logger.WithField("error", err).Fatal("Cannot create ssh directory")
 		}
 		uid, _ := strconv.Atoi(sshKeyUser.Uid)
 		gid, _ := strconv.Atoi(sshKeyUser.Gid)
 		if err := os.Chown(sshKeyDir, uid, gid); err != nil {
-			logger.WithFields(log.Fields{
-				"error": err,
-			}).Fatal("Cannot change owner of ssh directory")
+			logger.WithField("error", err).Fatal("Cannot change owner of ssh directory")
 		}
 	}
 	if err := unix.Access(sshKeyDir, unix.W_OK); err != nil {
-		logger.WithFields(log.Fields{
-			"error": err,
-		}).Fatal("Cannot write to ssh directory")
+		logger.WithField("error", err).Fatal("Cannot write to ssh directory")
 	}
 }
 
@@ -101,7 +95,7 @@ func (c *Handler) Write(body io.ReadCloser) (Key, string, error) {
 	}
 	uid, _ := strconv.Atoi(sshKeyUser.Uid)
 	gid, _ := strconv.Atoi(sshKeyUser.Gid)
-	if err := os.Chown(c.KeyPath, uid, gid); err != nil {
+	if err = os.Chown(c.KeyPath, uid, gid); err != nil {
 		return parsedSSHKey, "Cannot change owner for authorized_keys file", err
 	}
 
