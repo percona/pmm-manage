@@ -50,22 +50,26 @@ func (c *Handler) RunSSHKeyChecks() {
 	}
 }
 
-func parse(authorizedKey []byte) (Key, error) {
+func parse(authorizedKey []byte) (*Key, error) {
 	pubKey, comment, _, _, err := ssh.ParseAuthorizedKey(authorizedKey)
 	if err != nil {
-		return Key{}, err
+		return nil, err
 	}
-	return Key{
+	return &Key{
 		Type:        pubKey.Type(),
 		Comment:     comment,
 		Fingerprint: ssh.FingerprintSHA256(pubKey),
 	}, err
 }
 
-func (c *Handler) Read() (Key, string, error) {
+// Read reads ssh key from c.KeyPath and parses it, returns sshKey, result and error.
+// sshKey is struct with parsed key.
+// result is human readable message, which can be shown to the end user (can be localized).
+// error is debug information which is passed for debug needs, shouldn't be shown to user.
+func (c *Handler) Read() (*Key, string, error) {
 	authorizedKey, err := ioutil.ReadFile(c.KeyPath)
 	if err != nil {
-		return Key{}, "Cannot read ssh key", err
+		return nil, "Cannot read ssh key", err
 	}
 	sshKey, err := parse(authorizedKey)
 	if err != nil {
@@ -74,10 +78,14 @@ func (c *Handler) Read() (Key, string, error) {
 	return sshKey, "success", nil
 }
 
-func (c *Handler) Write(body io.ReadCloser) (Key, string, error) {
+// Write parses ssh key from json and writes to c.KeyPath and returns sshKey, result and error.
+// sshKey is struct with parsed key.
+// result is human readable message, which can be shown to the end user (can be localized).
+// error is debug information which is passed for debug needs, shouldn't be shown to user.
+func (c *Handler) Write(body io.ReadCloser) (*Key, string, error) {
 	var newSSHKey Key
 	if err := json.NewDecoder(body).Decode(&newSSHKey); err != nil {
-		return newSSHKey, "Cannot parse json", err
+		return &newSSHKey, "Cannot parse json", err
 	}
 
 	parsedSSHKey, err := parse([]byte(newSSHKey.Key))
