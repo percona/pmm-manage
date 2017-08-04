@@ -41,13 +41,15 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 	result, err := user.CreateUser(newUser)
 	if err != nil {
 		returnError(w, req, http.StatusInternalServerError, result, err)
-	} else if result != "success" {
-		returnError(w, req, http.StatusForbidden, result, nil)
-	} else {
+		return
+	}
+	if result == "success" {
 		location := fmt.Sprintf("%s/%s", req.URL.String(), newUser.Username)
 		w.Header().Set("Location", location)
 		w.WriteHeader(http.StatusCreated)
 		returnUser(w, req, newUser.Username)
+	} else {
+		returnError(w, req, http.StatusForbidden, result, nil)
 	}
 }
 
