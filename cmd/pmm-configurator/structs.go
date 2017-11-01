@@ -19,4 +19,5 @@ type updateResponce struct {
 	Detail string `json:"detail,omitempty"`
 	From   string `json:"from,omitempty"`
 	To     string `json:"to,omitempty"`
+	Step   string `json:"step,omitempty"`
 }
