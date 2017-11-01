@@ -6,7 +6,9 @@
 @test "prepare" {
     mkdir -p "${BATS_TEST_DIRNAME}/sandbox/log" || :
     rm -rf "${BATS_TEST_DIRNAME}"/sandbox/log/*.log || :
-    printf "PID: $$\n" \
+    printf "# v1.4.0\n - name: PMM\n - name: PMM\n" \
+        > "${BATS_TEST_DIRNAME}/sandbox/main.yml"
+    printf "PID: $$\n1 plays in ${BATS_TEST_DIRNAME}/sandbox/main.yml\nTASK [Gathering Facts]\nTASK [PMM]\n" \
         > "${BATS_TEST_DIRNAME}/sandbox/log/00-running__0000-00-00T00:00:00.log"
     printf "PID: 77777\nlocalhost                  : ok=18   changed=10   unreachable=0    failed=0\n" \
         > "${BATS_TEST_DIRNAME}/sandbox/log/01-success__0000-00-00T00:00:01.log"
@@ -35,7 +37,7 @@
         skip "can be checked only locally"
     fi
 
-    printf "PID: $$\n" \
+    printf "PID: $$\n1 plays in ${BATS_TEST_DIRNAME}/sandbox/main.yml\nTASK [Gathering Facts]\nTASK [PMM]\n" \
         > "${BATS_TEST_DIRNAME}/sandbox/log/00-running__0000-00-00T00:00:00.log"
 
     run curl \
@@ -46,7 +48,8 @@
     echo "$output" >&2
 
     [[ "$status" -eq 0 ]]
-    [[ "$output" =~ '"title":"running"' ]]
+    [[ "$output" =~ '"code":200,"status":"OK","title":"running"' ]]
+    [[ "$output" =~ '"step":"2/3"' ]]
 }
 
 @test "get succeeded" {
@@ -83,5 +86,6 @@
 
 @test "cleanup" {
     rm -rf "${BATS_TEST_DIRNAME}"/sandbox/log/*.log || :
+    rm -rf "${BATS_TEST_DIRNAME}/sandbox/main.yml" || :
     rmdir "${BATS_TEST_DIRNAME}/sandbox/log"
 }
