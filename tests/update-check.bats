@@ -28,7 +28,7 @@
     fi
 
     echo '# v1.4.0' > ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
-    echo '# v1.5.0' > ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+    echo '# v1.4.777' > ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
 
     run curl \
         -s \
@@ -38,7 +38,7 @@
     echo "$output" >&2
     rm -rf ${BATS_TEST_DIRNAME}"/sandbox/main.yml" ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
 
-    [[ "$output" = '{"code":200,"status":"OK","title":"A new PMM version is available.","from":"1.4.0","to":"1.5.0"}' ]]
+    [[ "$output" = '{"code":200,"status":"OK","title":"A new PMM version is available.","from":"1.4.0 (October 20, 2017)","to":"1.4.777"}' ]]
 }
 
 @test "check update - unknown version available" {
