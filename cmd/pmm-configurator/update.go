@@ -24,6 +24,9 @@ var timeRegexp = regexp.MustCompile(`__(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).log
 var fromVersionRegexp = regexp.MustCompile(`> # v(\d+\.\d+\.\d+)\b`)
 var toVersionRegexp = regexp.MustCompile(`< # v(\d+\.\d+\.\d+)\b`)
 var releaseNotesRegexp = regexp.MustCompile(`:Date: (.+)\n`)
+var playbookRegexp = regexp.MustCompile(`1 plays in (.+)\n`)
+var logTaskRegexp = regexp.MustCompile(`TASK`)
+var playbookTaskRegexp = regexp.MustCompile(`- name:`)
 
 func isPidAlive(pid int) bool {
 	if err := syscall.Kill(pid, syscall.Signal(0x0)); err == nil {
@@ -182,16 +185,34 @@ func returnLog(w http.ResponseWriter, req *http.Request, timestamp string, httpS
 		}
 	}
 
+	stepInfo := getStepsInfo(fileContent)
+
 	location := fmt.Sprintf("%s/v1/updates/%s", c.PathPrefix, timestamp)
 	w.Header().Set("Location", location)
 	w.WriteHeader(httpStatus)
 
-	json.NewEncoder(w).Encode(jsonResponce{ // nolint: errcheck
+	json.NewEncoder(w).Encode(updateResponce{ // nolint: errcheck
 		Code:   httpStatus,
 		Status: http.StatusText(httpStatus),
 		Title:  updateState,
 		Detail: string(fileContent),
+		Step:   stepInfo,
 	})
+}
+
+func getStepsInfo(fileContent []byte) string {
+	indexes := logTaskRegexp.FindAllIndex(fileContent, -1)
+	currentStep := len(indexes)
+
+	totalSteps := 0
+	if playbookPathMatch := playbookRegexp.FindSubmatch(fileContent); len(playbookPathMatch) == 2 {
+		if playbookContent, err := ioutil.ReadFile(string(playbookPathMatch[1])); err == nil {
+			indexes := playbookTaskRegexp.FindAllIndex(playbookContent, -1)
+			totalSteps = len(indexes) + 1 // add mandatory "Gathering Facts" task
+		}
+	}
+
+	return fmt.Sprintf("%v/%v", currentStep, totalSteps)
 }
 
 func runUpdateHandler(w http.ResponseWriter, req *http.Request) {
