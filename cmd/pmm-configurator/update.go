@@ -21,7 +21,9 @@ import (
 var pidRegexp = regexp.MustCompile(`PID: (\d+)`)
 var resultRegexp = regexp.MustCompile(`localhost .* failed=0\s`)
 var timeRegexp = regexp.MustCompile(`__(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).log`)
-var versionRegexp = regexp.MustCompile(`[<>] # v(\d+\.\d+\.\d+)\b`)
+var fromVersionRegexp = regexp.MustCompile(`> # v(\d+\.\d+\.\d+)\b`)
+var toVersionRegexp = regexp.MustCompile(`< # v(\d+\.\d+\.\d+)\b`)
+var releaseNotesRegexp = regexp.MustCompile(`:Date: (.+)\n`)
 
 func isPidAlive(pid int) bool {
 	if err := syscall.Kill(pid, syscall.Signal(0x0)); err == nil {
@@ -81,13 +83,39 @@ func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func parseOutput(output []byte) (string, string) {
-	match := versionRegexp.FindAllStringSubmatch(string(output), 2)
+	from := "unknown"
+	to := "unknown"
 
-	if len(match) != 2 {
-		return "unknown", "unknown"
+	match := fromVersionRegexp.FindStringSubmatch(string(output))
+	if len(match) == 2 {
+		from = fetchReleaseDate(match[1])
 	}
 
-	return match[1][1], match[0][1]
+	match = toVersionRegexp.FindStringSubmatch(string(output))
+	if len(match) == 2 {
+		to = fetchReleaseDate(match[1])
+	}
+
+	return from, to
+}
+
+func fetchReleaseDate(version string) string {
+	resp, err := http.Get("https://raw.githubusercontent.com/percona/pmm/master/doc/source/release-notes/" + version + ".rst")
+	if err != nil {
+		return version
+	}
+	defer resp.Body.Close() // nolint: errcheck
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return version
+	}
+
+	match := releaseNotesRegexp.FindStringSubmatch(string(body))
+	if len(match) != 2 {
+		return version
+	}
+	return version + " (" + match[1] + ")"
 }
 
 func readUpdateList() (map[string]string, error) {
