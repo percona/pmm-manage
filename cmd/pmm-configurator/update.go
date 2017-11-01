@@ -21,6 +21,7 @@ import (
 var pidRegexp = regexp.MustCompile(`PID: (\d+)`)
 var resultRegexp = regexp.MustCompile(`localhost .* failed=0\s`)
 var timeRegexp = regexp.MustCompile(`__(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).log`)
+var versionRegexp = regexp.MustCompile(`[<>] # v(\d+\.\d+\.\d+)\b`)
 
 func isPidAlive(pid int) bool {
 	if err := syscall.Kill(pid, syscall.Signal(0x0)); err == nil {
@@ -63,18 +64,30 @@ func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// check for update
-	if err := exec.Command("pmm-update-check").Run(); err != nil { // nolint: gas
-		// TODO: add "from"/"to" versions into Title
-		json.NewEncoder(w).Encode(jsonResponce{ // nolint: errcheck
+	if cmdOutput, err := exec.Command("pmm-update-check").CombinedOutput(); err != nil {
+		from, to := parseOutput(cmdOutput)
+		json.NewEncoder(w).Encode(updateResponce{ // nolint: errcheck
 			Code:   http.StatusOK,
 			Status: http.StatusText(http.StatusOK),
 			Title:  "A new PMM version is available.",
+			From:   from,
+			To:     to,
 		})
 		return
 	}
 
 	// no update
 	returnError(w, req, http.StatusNotFound, "Your PMM version is up-to-date.", nil)
+}
+
+func parseOutput(output []byte) (string, string) {
+	match := versionRegexp.FindAllStringSubmatch(string(output), 2)
+
+	if len(match) != 2 {
+		return "unknown", "unknown"
+	}
+
+	return match[1][1], match[0][1]
 }
 
 func readUpdateList() (map[string]string, error) {
