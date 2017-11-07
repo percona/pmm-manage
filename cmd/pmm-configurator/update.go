@@ -29,6 +29,18 @@ func isPidAlive(pid int) bool {
 	return false
 }
 
+func isUpdateDisabled() bool {
+	_, lockFileErr := os.Stat(path.Join(c.UpdateDirPath, "DISABLE_UPDATES"))
+	disableUpdates, _ := strconv.ParseBool(os.Getenv("DISABLE_UPDATES"))
+
+	// lock file exists or env variable is true
+	if lockFileErr == nil || disableUpdates {
+		return true
+	}
+
+	return false
+}
+
 func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
 	pidFile := path.Join(c.UpdateDirPath, "pmm-update.pid")
 	if _, err := os.Stat(pidFile); err == nil {
@@ -44,8 +56,14 @@ func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	// check if update is disabled
+	if isUpdateDisabled() {
+		returnError(w, req, http.StatusNotFound, "PMM updates has been disabled by DISABLE_UPDATES environment variable", nil)
+		return
+	}
+
 	// check for update
-	if err := exec.Command("/usr/bin/pmm-update-check").Run(); err != nil { // nolint: gas
+	if err := exec.Command("pmm-update-check").Run(); err != nil { // nolint: gas
 		// TODO: add "from"/"to" versions into Title
 		json.NewEncoder(w).Encode(jsonResponce{ // nolint: errcheck
 			Code:   http.StatusOK,
@@ -154,6 +172,12 @@ func returnLog(w http.ResponseWriter, req *http.Request, timestamp string, httpS
 }
 
 func runUpdateHandler(w http.ResponseWriter, req *http.Request) {
+	// check if update is disabled
+	if isUpdateDisabled() {
+		returnError(w, req, http.StatusNotFound, "PMM updates has been disabled by DISABLE_UPDATES environment variable", nil)
+		return
+	}
+
 	if err := exec.Command("screen", "-d", "-m", "/usr/bin/pmm-update").Run(); err != nil { // nolint: gas
 		returnError(w, req, http.StatusInternalServerError, "Cannot run update", err)
 		return
