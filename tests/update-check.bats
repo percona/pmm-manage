@@ -18,7 +18,7 @@
     echo "$output" >&2
     rm -rf ${BATS_TEST_DIRNAME}"/sandbox/DISABLE_UPDATES"
 
-    [[ "$output" = '{"code":404,"status":"Not Found","title":"PMM updates has been disabled by DISABLE_UPDATES environment variable"}' ]]
+    [[ "$output" = '{"code":404,"status":"Not Found","title":"Updating of PMM is disabled."}' ]]
 }
 
 @test "check update - up-to-date" {

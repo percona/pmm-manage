@@ -58,7 +58,7 @@ func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
 
 	// check if update is disabled
 	if isUpdateDisabled() {
-		returnError(w, req, http.StatusNotFound, "PMM updates has been disabled by DISABLE_UPDATES environment variable", nil)
+		returnError(w, req, http.StatusNotFound, "Updating of PMM is disabled.", nil)
 		return
 	}
 
@@ -174,7 +174,7 @@ func returnLog(w http.ResponseWriter, req *http.Request, timestamp string, httpS
 func runUpdateHandler(w http.ResponseWriter, req *http.Request) {
 	// check if update is disabled
 	if isUpdateDisabled() {
-		returnError(w, req, http.StatusNotFound, "PMM updates has been disabled by DISABLE_UPDATES environment variable", nil)
+		returnError(w, req, http.StatusNotFound, "Updating of PMM is disabled.", nil)
 		return
 	}
 
