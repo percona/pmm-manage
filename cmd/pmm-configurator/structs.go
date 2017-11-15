@@ -7,3 +7,7 @@ type jsonResponce struct {
 	Title  string `json:"title,omitempty"`
 	Detail string `json:"detail,omitempty"`
 }
+
+type instance struct {
+	ID string `json:"InstanceID"`
+}

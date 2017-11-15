@@ -4,4 +4,5 @@ package user
 type PMMUser struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Instance string `json:"instance,omitempty"`
 }

@@ -116,8 +116,8 @@ setup() {
     run grep "^  username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
     [[ "$status" -eq 0 ]]
 
-    grep "^- password: " "${BATS_TEST_DIRNAME}/sandbox/config.yml" >&2
-    run grep "^- password: ${PASSWORD1}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
+    grep "^  password: " "${BATS_TEST_DIRNAME}/sandbox/config.yml" >&2
+    run grep "^  password: ${PASSWORD1}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
     [[ "$status" -eq 0 ]]
 }
 
@@ -195,7 +195,7 @@ setup() {
     run grep "^  username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
     [[ "$status" -eq 0 ]]
 
-    run grep "^- password: ${PASSWORD2}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
+    run grep "^  password: ${PASSWORD2}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
     [[ "$status" -eq 0 ]]
 }
 

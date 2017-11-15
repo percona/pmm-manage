@@ -38,7 +38,13 @@ func createUserHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	result, err := user.CreateUser(newUser)
+	result, err := checkInstance(newUser.Instance)
+	if result != "success" {
+		returnError(w, req, http.StatusForbidden, result, err)
+		return
+	}
+
+	result, err = user.CreateUser(newUser)
 	if err != nil {
 		returnError(w, req, http.StatusInternalServerError, result, err)
 		return
