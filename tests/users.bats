@@ -82,12 +82,12 @@ setup() {
         skip "can be checked only locally"
     fi
 
-    grep "^      username: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
-    run grep "^      username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
+    egrep "^\s+username: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
+    run egrep "^\s+username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
     [[ "$status" -eq 0 ]]
 
-    grep "^      password: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
-    run grep "^      password: ${PASSWORD1}" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
+    egrep "^\s+password: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
+    run egrep "^\s+password: ${PASSWORD1}" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
     [[ "$status" -eq 0 ]]
 }
 
@@ -112,12 +112,12 @@ setup() {
         skip "can be checked only locally"
     fi
 
-    grep "^  username: " "${BATS_TEST_DIRNAME}/sandbox/config.yml" >&2
-    run grep "^  username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
+    egrep "^\s+username: " "${BATS_TEST_DIRNAME}/sandbox/config.yml" >&2
+    run egrep "^\s+username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
     [[ "$status" -eq 0 ]]
 
-    grep "^  password: " "${BATS_TEST_DIRNAME}/sandbox/config.yml" >&2
-    run grep "^  password: ${PASSWORD1}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
+    egrep "^\s+password: " "${BATS_TEST_DIRNAME}/sandbox/config.yml" >&2
+    run egrep "^\s+password: ${PASSWORD1}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
     [[ "$status" -eq 0 ]]
 }
 
@@ -161,12 +161,12 @@ setup() {
         skip "can be checked only locally"
     fi
 
-    grep "^      username: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
-    run grep "^      username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
+    egrep "^\s+username: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
+    run egrep "^\s+username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
     [[ "$status" -eq 0 ]]
 
-    grep "^      password: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
-    run grep "^      password: ${PASSWORD2}" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
+    egrep "^\s+password: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
+    run egrep "^\s+password: ${PASSWORD2}" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
     [[ "$status" -eq 0 ]]
 }
 
@@ -192,10 +192,10 @@ setup() {
         skip "can be checked only locally"
     fi
 
-    run grep "^  username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
+    run egrep "^\s+username: ${USERNAME}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
     [[ "$status" -eq 0 ]]
 
-    run grep "^  password: ${PASSWORD2}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
+    run egrep "^\s+password: ${PASSWORD2}" "${BATS_TEST_DIRNAME}/sandbox/config.yml"
     [[ "$status" -eq 0 ]]
 }
 
@@ -229,15 +229,14 @@ setup() {
         skip "can be checked only locally"
     fi
 
-    grep "^      username: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
-    run grep "^      username: pmm" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
+    egrep "^\s+username: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
+    run egrep "^\s+username: pmm" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
     [[ "$status" -eq 0 ]]
 
-    grep "^      password: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
-    run grep "^      password: pmm" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
+    egrep "^\s+password: " "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml" >&2
+    run egrep "^\s+password: pmm" "${BATS_TEST_DIRNAME}/sandbox/prometheus.yml"
     [[ "$status" -eq 0 ]]
 }
-
 
 @test "check deleted http user" {
     if [ -n "${REMOTE}" ]; then
