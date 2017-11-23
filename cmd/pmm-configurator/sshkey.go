@@ -15,6 +15,12 @@ func getSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func setSSHKeyHandler(w http.ResponseWriter, req *http.Request) {
+	result, err := checkInstance("") // dirty hack, check if AWS EC2 instance
+	if result != "success" {
+		returnError(w, req, http.StatusForbidden, result, err)
+		return
+	}
+
 	parsedSSHKey, result, err := SSHKey.Write(req.Body)
 	if result == "success" {
 		w.Header().Set("Location", req.URL.String())

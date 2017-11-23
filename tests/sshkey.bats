@@ -53,6 +53,26 @@
     fi
 }
 
+@test "set sshkey - aws" {
+    KEY=$(cat ${BATS_TMPDIR}/id_rsa.pub)
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
+    echo -n wrong id > ${BATS_TEST_DIRNAME}"/sandbox/INSTANCE_ID"
+    run curl \
+        -s \
+        -X POST \
+        --insecure \
+        -d "{\"Key\": \"${KEY}\"}" \
+        ${SUT}/${URL_PREFIX}/v1/sshkey
+    echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/INSTANCE_ID"
+
+    [[ "$status" -eq 0 ]]
+    [[ "$output" = '{"code":403,"status":"Forbidden","title":"Wrong Instance ID"}' ]]
+}
+
 @test "cleanup" {
     rm -rf "${BATS_TEST_DIRNAME}/sandbox/authorized_keys" || :
     rm -rf "${BATS_TMPDIR}"/id_rsa* || :
