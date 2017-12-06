@@ -184,11 +184,12 @@ func runUpdateHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Advanced Sleep Programming :)
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	timestamp, _, err := getCurrentUpdate()
 	if timestamp == "" || err != nil {
 		returnError(w, req, http.StatusInternalServerError, "Cannot find update log", err)
+		return
 	}
 
 	returnLog(w, req, timestamp, http.StatusAccepted)
