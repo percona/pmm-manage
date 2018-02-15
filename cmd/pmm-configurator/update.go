@@ -27,6 +27,7 @@ var releaseNotesRegexp = regexp.MustCompile(`:Date: (.+)\n`)
 var playbookRegexp = regexp.MustCompile(`1 plays in (.+)\n`)
 var logTaskRegexp = regexp.MustCompile(`TASK`)
 var playbookTaskRegexp = regexp.MustCompile(`- name:`)
+var releaseNotesUrl = `https://raw.githubusercontent.com/percona/pmm/master/doc/source/release-notes/%s.rst`
 
 func isPidAlive(pid int) bool {
 	if err := syscall.Kill(pid, syscall.Signal(0x0)); err == nil {
@@ -70,7 +71,7 @@ func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
 
 	// check for update
 	if cmdOutput, err := exec.Command("pmm-update-check").CombinedOutput(); err != nil {
-		from, to := parseOutput(cmdOutput)
+		from, to := parseOutput(string(cmdOutput))
 		json.NewEncoder(w).Encode(updateResponce{ // nolint: errcheck
 			Code:   http.StatusOK,
 			Status: http.StatusText(http.StatusOK),
@@ -85,16 +86,16 @@ func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
 	returnError(w, req, http.StatusNotFound, "Your PMM version is up-to-date.", nil)
 }
 
-func parseOutput(output []byte) (string, string) {
+func parseOutput(output string) (string, string) {
 	from := "unknown"
 	to := "unknown"
 
-	match := fromVersionRegexp.FindStringSubmatch(string(output))
+	match := fromVersionRegexp.FindStringSubmatch(output)
 	if len(match) == 2 {
 		from = fetchReleaseDate(match[1])
 	}
 
-	match = toVersionRegexp.FindStringSubmatch(string(output))
+	match = toVersionRegexp.FindStringSubmatch(output)
 	if len(match) == 2 {
 		to = fetchReleaseDate(match[1])
 	}
@@ -103,7 +104,7 @@ func parseOutput(output []byte) (string, string) {
 }
 
 func fetchReleaseDate(version string) string {
-	resp, err := http.Get("https://raw.githubusercontent.com/percona/pmm/master/doc/source/release-notes/" + version + ".rst")
+	resp, err := http.Get(fmt.Sprintf(releaseNotesUrl, version))
 	if err != nil {
 		return version
 	}
