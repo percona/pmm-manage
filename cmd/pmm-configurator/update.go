@@ -23,6 +23,7 @@ var resultRegexp = regexp.MustCompile(`localhost .* failed=0\s`)
 var timeRegexp = regexp.MustCompile(`__(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).log`)
 var fromVersionRegexp = regexp.MustCompile(`> # v(\d+\.\d+\.\d+)\b`)
 var toVersionRegexp = regexp.MustCompile(`< # v(\d+\.\d+\.\d+)\b`)
+var currentVersionRegexp = regexp.MustCompile(`^# v(\d+\.\d+\.\d+)\b`)
 var releaseNotesRegexp = regexp.MustCompile(`:Date: (.+)\n`)
 var playbookRegexp = regexp.MustCompile(`1 plays in (.+)\n`)
 var logTaskRegexp = regexp.MustCompile(`TASK`)
@@ -159,6 +160,26 @@ func getUpdateListHandler(w http.ResponseWriter, req *http.Request) {
 func getUpdateHandler(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	returnLog(w, req, params["timestamp"], http.StatusOK)
+}
+
+func getCurrentVersionHandler(w http.ResponseWriter, req *http.Request) {
+	fileContent, err := ioutil.ReadFile("/srv/update/main.yml")
+	if err != nil {
+		returnError(w, req, http.StatusInternalServerError, "Cannot read current version", err)
+		return
+	}
+	match := currentVersionRegexp.FindSubmatch(fileContent)
+	if len(match) == 2 {
+		version := fetchReleaseDate(string(match[1]))
+		json.NewEncoder(w).Encode(jsonResponce{ // nolint: errcheck
+			Code:   http.StatusOK,
+			Status: http.StatusText(http.StatusOK),
+			Title:  version,
+			Detail: version,
+		})
+	} else {
+		returnError(w, req, http.StatusInternalServerError, "Cannot parse current version", err)
+	}
 }
 
 func returnLog(w http.ResponseWriter, req *http.Request, timestamp string, httpStatus int) {
