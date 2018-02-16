@@ -32,6 +32,7 @@ func main() {
 
 	router.HandleFunc("/v1/check-instance", checkInstanceHandler).Methods("POST")
 	router.HandleFunc("/v1/check-update", runCheckUpdateHandler).Methods("GET")
+	router.HandleFunc("/v1/version", getCurrentVersionHandler).Methods("GET")
 	router.HandleFunc("/v1/updates", getUpdateListHandler).Methods("GET")
 	router.HandleFunc("/v1/updates", runUpdateHandler).Methods("POST")
 	router.HandleFunc("/v1/updates/{timestamp}", getUpdateHandler).Methods("GET")

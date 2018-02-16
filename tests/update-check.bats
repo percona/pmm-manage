@@ -3,6 +3,25 @@
 [ -z "$SUT" ] && SUT='http://127.0.0.1:7777' || :
 [ -z "$URL_PREFIX" ] && URL_PREFIX='configurator' || :
 
+@test "check current version" {
+    if [ -z "${DEVELOPER_MODE}" ]; then
+        skip "can be checked only locally"
+    fi
+
+    echo '# v1.4.0' > ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+
+    run curl \
+        -s \
+        -X GET \
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v1/version"
+    echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+
+    [[ "$output" = '{"code":200,"status":"OK","title":"1.4.0 (October 20, 2017)","detail":"1.4.0 (October 20, 2017)"}' ]]
+}
+
+
 @test "update - DISABLE_UPDATES" {
     if [ -n "${REMOTE}" ]; then
         skip "can be checked only locally"
