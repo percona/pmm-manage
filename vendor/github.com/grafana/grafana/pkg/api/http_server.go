@@ -9,13 +9,18 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	gocache "github.com/patrickmn/go-cache"
 	macaron "gopkg.in/macaron.v1"
 
 	"github.com/grafana/grafana/pkg/api/live"
 	httpstatic "github.com/grafana/grafana/pkg/api/static"
 	"github.com/grafana/grafana/pkg/bus"
-	"github.com/grafana/grafana/pkg/cmd/grafana-cli/logger"
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/log"
 	"github.com/grafana/grafana/pkg/middleware"
@@ -24,22 +29,24 @@ import (
 	"github.com/grafana/grafana/pkg/setting"
 )
 
-type HttpServer struct {
+type HTTPServer struct {
 	log           log.Logger
 	macaron       *macaron.Macaron
 	context       context.Context
 	streamManager *live.StreamManager
+	cache         *gocache.Cache
 
 	httpSrv *http.Server
 }
 
-func NewHttpServer() *HttpServer {
-	return &HttpServer{
-		log: log.New("http.server"),
+func NewHTTPServer() *HTTPServer {
+	return &HTTPServer{
+		log:   log.New("http.server"),
+		cache: gocache.New(5*time.Minute, 10*time.Minute),
 	}
 }
 
-func (hs *HttpServer) Start(ctx context.Context) error {
+func (hs *HTTPServer) Start(ctx context.Context) error {
 	var err error
 
 	hs.context = ctx
@@ -67,11 +74,14 @@ func (hs *HttpServer) Start(ctx context.Context) error {
 			return nil
 		}
 	case setting.SOCKET:
-		ln, err := net.Listen("unix", setting.SocketPath)
+		ln, err := net.ListenUnix("unix", &net.UnixAddr{Name: setting.SocketPath, Net: "unix"})
 		if err != nil {
 			hs.log.Debug("server was shutdown gracefully")
 			return nil
 		}
+
+		// Make socket writable by group
+		os.Chmod(setting.SocketPath, 0660)
 
 		err = hs.httpSrv.Serve(ln)
 		if err != nil {
@@ -86,13 +96,13 @@ func (hs *HttpServer) Start(ctx context.Context) error {
 	return err
 }
 
-func (hs *HttpServer) Shutdown(ctx context.Context) error {
+func (hs *HTTPServer) Shutdown(ctx context.Context) error {
 	err := hs.httpSrv.Shutdown(ctx)
-	hs.log.Info("stopped http server")
+	hs.log.Info("Stopped HTTP server")
 	return err
 }
 
-func (hs *HttpServer) listenAndServeTLS(certfile, keyfile string) error {
+func (hs *HTTPServer) listenAndServeTLS(certfile, keyfile string) error {
 	if certfile == "" {
 		return fmt.Errorf("cert_file cannot be empty when using HTTPS")
 	}
@@ -129,30 +139,35 @@ func (hs *HttpServer) listenAndServeTLS(certfile, keyfile string) error {
 	}
 
 	hs.httpSrv.TLSConfig = tlsCfg
-	hs.httpSrv.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0)
+	hs.httpSrv.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler))
 
 	return hs.httpSrv.ListenAndServeTLS(setting.CertFile, setting.KeyFile)
 }
 
-func (hs *HttpServer) newMacaron() *macaron.Macaron {
+func (hs *HTTPServer) newMacaron() *macaron.Macaron {
 	macaron.Env = setting.Env
 	m := macaron.New()
 
 	m.Use(middleware.Logger())
-	m.Use(middleware.Recovery())
 
 	if setting.EnableGzip {
 		m.Use(middleware.Gziper())
 	}
 
+	m.Use(middleware.Recovery())
+
 	for _, route := range plugins.StaticRoutes {
 		pluginRoute := path.Join("/public/plugins/", route.PluginId)
-		logger.Debug("Plugins: Adding route", "route", pluginRoute, "dir", route.Directory)
+		hs.log.Debug("Plugins: Adding route", "route", pluginRoute, "dir", route.Directory)
 		hs.mapStatic(m, route.Directory, "", pluginRoute)
 	}
 
 	hs.mapStatic(m, setting.StaticRootPath, "", "public")
 	hs.mapStatic(m, setting.StaticRootPath, "robots.txt", "robots.txt")
+
+	if setting.ImageUploadProvider == "local" {
+		hs.mapStatic(m, setting.ImagesDir, "", "/public/img/attachments")
+	}
 
 	m.Use(macaron.Renderer(macaron.RenderOptions{
 		Directory:  path.Join(setting.StaticRootPath, "views"),
@@ -161,9 +176,9 @@ func (hs *HttpServer) newMacaron() *macaron.Macaron {
 	}))
 
 	m.Use(hs.healthHandler)
+	m.Use(hs.metricsEndpoint)
 	m.Use(middleware.GetContextHandler())
-	m.Use(middleware.Sessioner(&setting.SessionOptions))
-	m.Use(middleware.RequestMetrics())
+	m.Use(middleware.Sessioner(&setting.SessionOptions, setting.SessionConnMaxLifetime))
 	m.Use(middleware.OrgRedirect())
 
 	// needs to be after context handler
@@ -176,8 +191,18 @@ func (hs *HttpServer) newMacaron() *macaron.Macaron {
 	return m
 }
 
-func (hs *HttpServer) healthHandler(ctx *macaron.Context) {
-	if ctx.Req.Method != "GET" || ctx.Req.URL.Path != "/api/health" {
+func (hs *HTTPServer) metricsEndpoint(ctx *macaron.Context) {
+	if ctx.Req.Method != "GET" || ctx.Req.URL.Path != "/metrics" {
+		return
+	}
+
+	promhttp.HandlerFor(prometheus.DefaultGatherer, promhttp.HandlerOpts{}).
+		ServeHTTP(ctx.Resp, ctx.Req.Request)
+}
+
+func (hs *HTTPServer) healthHandler(ctx *macaron.Context) {
+	notHeadOrGet := ctx.Req.Method != http.MethodGet && ctx.Req.Method != http.MethodHead
+	if notHeadOrGet || ctx.Req.URL.Path != "/api/health" {
 		return
 	}
 
@@ -199,7 +224,7 @@ func (hs *HttpServer) healthHandler(ctx *macaron.Context) {
 	ctx.Resp.Write(dataBytes)
 }
 
-func (hs *HttpServer) mapStatic(m *macaron.Macaron, rootDir string, dir string, prefix string) {
+func (hs *HTTPServer) mapStatic(m *macaron.Macaron, rootDir string, dir string, prefix string) {
 	headers := func(c *macaron.Context) {
 		c.Resp.Header().Set("Cache-Control", "public, max-age=3600")
 	}

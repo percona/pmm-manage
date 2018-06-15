@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"runtime"
 	"time"
 
 	"github.com/grafana/grafana/pkg/cmd/grafana-cli/logger"
@@ -22,7 +23,7 @@ var (
 	grafanaVersion string
 )
 
-func Init(version string) {
+func Init(version string, skipTLSVerify bool) {
 	grafanaVersion = version
 
 	tr := &http.Transport{
@@ -30,17 +31,19 @@ func Init(version string) {
 		DialContext: (&net.Dialer{
 			Timeout:   30 * time.Second,
 			KeepAlive: 30 * time.Second,
+			DualStack: true,
 		}).DialContext,
 		MaxIdleConns:          100,
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
-
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: skipTLSVerify,
+		},
 	}
 
 	HttpClient = http.Client{
-		Timeout:   time.Duration(10 * time.Second),
+		Timeout:   10 * time.Second,
 		Transport: tr,
 	}
 }
@@ -153,6 +156,8 @@ func sendRequest(repoUrl string, subPaths ...string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 
 	req.Header.Set("grafana-version", grafanaVersion)
+	req.Header.Set("grafana-os", runtime.GOOS)
+	req.Header.Set("grafana-arch", runtime.GOARCH)
 	req.Header.Set("User-Agent", "grafana "+grafanaVersion)
 
 	if err != nil {

@@ -5,14 +5,13 @@ import (
 
 	"github.com/grafana/grafana/pkg/bus"
 	"github.com/grafana/grafana/pkg/log"
-	"github.com/grafana/grafana/pkg/middleware"
 	m "github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
 )
 
-func getFrontendSettingsMap(c *middleware.Context) (map[string]interface{}, error) {
+func getFrontendSettingsMap(c *m.ReqContext) (map[string]interface{}, error) {
 	orgDataSources := make([]*m.DataSource, 0)
 
 	if c.OrgId != 0 {
@@ -62,6 +61,8 @@ func getFrontendSettingsMap(c *middleware.Context) (map[string]interface{}, erro
 
 		if ds.JsonData != nil {
 			dsMap["jsonData"] = ds.JsonData
+		} else {
+			dsMap["jsonData"] = make(map[string]string)
 		}
 
 		if ds.Access == m.DS_ACCESS_DIRECT {
@@ -131,17 +132,19 @@ func getFrontendSettingsMap(c *middleware.Context) (map[string]interface{}, erro
 	}
 
 	jsonObj := map[string]interface{}{
-		"defaultDatasource":  defaultDatasource,
-		"datasources":        datasources,
-		"panels":             panels,
-		"appSubUrl":          setting.AppSubUrl,
-		"allowOrgCreate":     (setting.AllowUserOrgCreate && c.IsSignedIn) || c.IsGrafanaAdmin,
-		"authProxyEnabled":   setting.AuthProxyEnabled,
-		"ldapEnabled":        setting.LdapEnabled,
-		"alertingEnabled":    setting.AlertingEnabled,
-		"googleAnalyticsId":  setting.GoogleAnalyticsId,
-		"disableLoginForm":   setting.DisableLoginForm,
-		"disableSignoutMenu": setting.DisableSignoutMenu,
+		"defaultDatasource":       defaultDatasource,
+		"datasources":             datasources,
+		"panels":                  panels,
+		"appSubUrl":               setting.AppSubUrl,
+		"allowOrgCreate":          (setting.AllowUserOrgCreate && c.IsSignedIn) || c.IsGrafanaAdmin,
+		"authProxyEnabled":        setting.AuthProxyEnabled,
+		"ldapEnabled":             setting.LdapEnabled,
+		"alertingEnabled":         setting.AlertingEnabled,
+		"googleAnalyticsId":       setting.GoogleAnalyticsId,
+		"disableLoginForm":        setting.DisableLoginForm,
+		"externalUserMngInfo":     setting.ExternalUserMngInfo,
+		"externalUserMngLinkUrl":  setting.ExternalUserMngLinkUrl,
+		"externalUserMngLinkName": setting.ExternalUserMngLinkName,
 		"buildInfo": map[string]interface{}{
 			"version":       setting.BuildVersion,
 			"commit":        setting.BuildCommit,
@@ -176,7 +179,7 @@ func getPanelSort(id string) int {
 	return sort
 }
 
-func GetFrontendSettings(c *middleware.Context) {
+func GetFrontendSettings(c *m.ReqContext) {
 	settings, err := getFrontendSettingsMap(c)
 	if err != nil {
 		c.JsonApiErr(400, "Failed to get frontend settings", err)

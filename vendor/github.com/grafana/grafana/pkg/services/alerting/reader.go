@@ -16,7 +16,7 @@ type RuleReader interface {
 
 type DefaultRuleReader struct {
 	sync.RWMutex
-	serverID       string
+	//serverID       string
 	serverPosition int
 	clusterSize    int
 	log            log.Logger
@@ -59,7 +59,7 @@ func (arr *DefaultRuleReader) Fetch() []*Rule {
 		}
 	}
 
-	metrics.M_Alerting_Active_Alerts.Update(int64(len(res)))
+	metrics.M_Alerting_Active_Alerts.Set(float64(len(res)))
 	return res
 }
 
