@@ -41,6 +41,7 @@ var (
 	includeBuildNumber    bool     = true
 	buildNumber           int      = 0
 	binaries              []string = []string{"grafana-server", "grafana-cli"}
+	isDev                 bool     = false
 )
 
 const minGoVersion = 1.8
@@ -61,6 +62,7 @@ func main() {
 	flag.BoolVar(&race, "race", race, "Use race detector")
 	flag.BoolVar(&includeBuildNumber, "includeBuildNumber", includeBuildNumber, "IncludeBuildNumber in package name")
 	flag.IntVar(&buildNumber, "buildNumber", 0, "Build number from CI system")
+	flag.BoolVar(&isDev, "dev", isDev, "optimal for development, skips certain steps")
 	flag.Parse()
 
 	readVersionFromPackageJson()
@@ -79,9 +81,17 @@ func main() {
 		case "setup":
 			setup()
 
+		case "build-srv":
+			clean()
+			build("grafana-server", "./pkg/cmd/grafana-server", []string{})
+
 		case "build-cli":
 			clean()
 			build("grafana-cli", "./pkg/cmd/grafana-cli", []string{})
+
+		case "build-server":
+			clean()
+			build("grafana-server", "./pkg/cmd/grafana-server", []string{})
 
 		case "build":
 			clean()
@@ -95,9 +105,9 @@ func main() {
 
 		case "package":
 			grunt(gruntBuildArg("release")...)
-      if runtime.GOOS != "windows" {
-			  createLinuxPackages()
-      }
+			if runtime.GOOS != "windows" {
+				createLinuxPackages()
+			}
 
 		case "pkg-rpm":
 			grunt(gruntBuildArg("release")...)
@@ -347,11 +357,11 @@ func ChangeWorkingDir(dir string) {
 }
 
 func grunt(params ...string) {
-  if runtime.GOOS == "windows" {
-    runPrint(`.\node_modules\.bin\grunt`, params...)
-  } else {
-    runPrint("./node_modules/.bin/grunt", params...)
-  }
+	if runtime.GOOS == "windows" {
+		runPrint(`.\node_modules\.bin\grunt`, params...)
+	} else {
+		runPrint("./node_modules/.bin/grunt", params...)
+	}
 }
 
 func gruntBuildArg(task string) []string {
@@ -371,7 +381,7 @@ func gruntBuildArg(task string) []string {
 }
 
 func setup() {
-	runPrint("go", "get", "-v", "github.com/kardianos/govendor")
+	runPrint("go", "get", "-v", "github.com/golang/dep")
 	runPrint("go", "install", "-v", "./pkg/cmd/grafana-server")
 }
 
@@ -386,7 +396,9 @@ func build(binaryName, pkg string, tags []string) {
 		binary += ".exe"
 	}
 
-	rmr(binary, binary+".md5")
+	if !isDev {
+		rmr(binary, binary+".md5")
+	}
 	args := []string{"build", "-ldflags", ldflags()}
 	if len(tags) > 0 {
 		args = append(args, "-tags", strings.Join(tags, ","))
@@ -397,16 +409,21 @@ func build(binaryName, pkg string, tags []string) {
 
 	args = append(args, "-o", binary)
 	args = append(args, pkg)
-	setBuildEnv()
 
-	runPrint("go", "version")
+	if !isDev {
+		setBuildEnv()
+		runPrint("go", "version")
+	}
+
 	runPrint("go", args...)
 
-	// Create an md5 checksum of the binary, to be included in the archive for
-	// automatic upgrades.
-	err := md5File(binary)
-	if err != nil {
-		log.Fatal(err)
+	if !isDev {
+		// Create an md5 checksum of the binary, to be included in the archive for
+		// automatic upgrades.
+		err := md5File(binary)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -427,6 +444,10 @@ func rmr(paths ...string) {
 }
 
 func clean() {
+	if isDev {
+		return
+	}
+
 	rmr("dist")
 	rmr("tmp")
 	rmr(filepath.Join(os.Getenv("GOPATH"), fmt.Sprintf("pkg/%s_%s/github.com/grafana", goos, goarch)))
@@ -542,7 +563,7 @@ func shaFilesInDist() {
 			return nil
 		}
 
-		if strings.Contains(path, ".sha256") == false {
+		if !strings.Contains(path, ".sha256") {
 			err := shaFile(path)
 			if err != nil {
 				log.Printf("Failed to create sha file. error: %v\n", err)

@@ -7,7 +7,6 @@ package notifications
 import (
 	"bytes"
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"html/template"
 	"net"
@@ -17,7 +16,7 @@ import (
 	"github.com/grafana/grafana/pkg/log"
 	m "github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/setting"
-	"gopkg.in/gomail.v2"
+	gomail "gopkg.in/mail.v2"
 )
 
 var mailQueue chan *Message
@@ -101,7 +100,11 @@ func createDialer() (*gomail.Dialer, error) {
 
 	d := gomail.NewDialer(host, iPort, setting.Smtp.User, setting.Smtp.Password)
 	d.TLSConfig = tlsconfig
-	d.LocalName = setting.InstanceName
+	if setting.Smtp.EhloIdentity != "" {
+		d.LocalName = setting.Smtp.EhloIdentity
+	} else {
+		d.LocalName = setting.InstanceName
+	}
 	return d, nil
 }
 
@@ -131,7 +134,7 @@ func buildEmailMessage(cmd *m.SendEmailCommand) (*Message, error) {
 		subjectText, hasSubject := subjectData["value"]
 
 		if !hasSubject {
-			return nil, errors.New(fmt.Sprintf("Missing subject in Template %s", cmd.Template))
+			return nil, fmt.Errorf("Missing subject in Template %s", cmd.Template)
 		}
 
 		subjectTmpl, err := template.New("subject").Parse(subjectText.(string))

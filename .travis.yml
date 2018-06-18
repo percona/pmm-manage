@@ -10,7 +10,12 @@ matrix:
   allow_failures:
     - go: master
 
-install: true
+install:
+  # ensure that vendor/ is in sync with code and Gopkg.*
+  - curl https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 -L -o ~/dep && chmod +x ~/dep
+  - rm -fr vendor/
+  - ~/dep ensure -v -vendor-only
+  - git diff --exit-code
 
 script:
   go install -v ./cmd/...

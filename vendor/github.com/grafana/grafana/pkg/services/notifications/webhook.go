@@ -27,7 +27,8 @@ type Webhook struct {
 var netTransport = &http.Transport{
 	Proxy: http.ProxyFromEnvironment,
 	Dial: (&net.Dialer{
-		Timeout: 30 * time.Second,
+		Timeout:   30 * time.Second,
+		DualStack: true,
 	}).Dial,
 	TLSHandshakeTimeout: 5 * time.Second,
 }
@@ -99,8 +100,4 @@ func sendWebRequestSync(ctx context.Context, webhook *Webhook) error {
 
 	webhookLog.Debug("Webhook failed", "statuscode", resp.Status, "body", string(body))
 	return fmt.Errorf("Webhook response status %v", resp.Status)
-}
-
-var addToWebhookQueue = func(msg *Webhook) {
-	webhookQueue <- msg
 }
