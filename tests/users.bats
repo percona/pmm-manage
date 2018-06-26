@@ -2,6 +2,7 @@
 
 [ -z "$SUT" ] && SUT='http://127.0.0.1:7777' || :
 [ -z "$URL_PREFIX" ] && URL_PREFIX='configurator' || :
+[ -z "$INSTANCE_ID" ] && INSTANCE_ID='i-00000000000000000' || :
 
 setup() {
     export USERNAME=user1name
@@ -9,13 +10,14 @@ setup() {
 
     export PASSWORD1=random-password
     export PASSWORD2=pass1word
-    export INPUT1="{\"username\": \"${USERNAME}\", \"password\": \"${PASSWORD1}\"}"
-    export INPUT2="{\"username\": \"${USERNAME}\", \"password\": \"${PASSWORD2}\"}"
+    export INPUT1="{\"username\": \"${USERNAME}\", \"password\": \"${PASSWORD1}\", \"instance\": \"${INSTANCE_ID}\"}"
+    export INPUT2="{\"username\": \"${USERNAME}\", \"password\": \"${PASSWORD2}\", \"instance\": \"${INSTANCE_ID}\"}"
 
     mkdir -p "${BATS_TMPDIR}" || :
 }
 
 @test "create user" {
+    echo -n $INSTANCE_ID > ${BATS_TEST_DIRNAME}"/sandbox/INSTANCE_ID"
     run curl \
         -s \
         -X POST \
@@ -23,6 +25,7 @@ setup() {
         --insecure \
         "${SUT}/${URL_PREFIX}/v1/users"
     echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/INSTANCE_ID"
 
     [[ "$status" -eq 0 ]]
     [[ "$output" = "$OUTPUT" ]]
@@ -122,6 +125,7 @@ setup() {
 }
 
 @test "update user" {
+    echo -n $INSTANCE_ID > ${BATS_TEST_DIRNAME}"/sandbox/INSTANCE_ID"
     run curl \
         -s \
         -X PATCH \
@@ -130,6 +134,7 @@ setup() {
         --user "${USERNAME}:${PASSWORD1}" \
         "${SUT}/${URL_PREFIX}/v1/users/${USERNAME}"
     echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/INSTANCE_ID"
 
     [[ "$status" -eq 0 ]]
     [[ "$output" = "$OUTPUT" ]]

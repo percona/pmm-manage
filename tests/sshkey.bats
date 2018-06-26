@@ -14,6 +14,7 @@
     KEY=$(cat ${BATS_TMPDIR}/id_rsa.pub)
     DIGEST=$(ssh-keygen -lf "${BATS_TMPDIR}/id_rsa.pub" | awk '{print$2}')
 
+    echo -n > ${BATS_TEST_DIRNAME}"/sandbox/INSTANCE_ID"
     run curl \
         -s \
         -X POST \
@@ -21,6 +22,7 @@
         -d "{\"Key\": \"${KEY}\"}" \
         ${SUT}/${URL_PREFIX}/v1/sshkey
     echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/INSTANCE_ID"
 
     [[ "$status" -eq 0 ]]
     [[ "$output" =~ '"type":"ssh-rsa"' ]]

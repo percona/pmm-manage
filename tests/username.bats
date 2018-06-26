@@ -1,21 +1,25 @@
 #!/usr/bin/env bats
 
-setup() {
-    [ -z "$SUT" ] \
-        && export SUT='http://127.0.0.1:7777' || :
-    [ -z "$URL_PREFIX" ] \
-        && export URL_PREFIX='configurator' || :
+[ -z "$SUT" ] && SUT='http://127.0.0.1:7777' || :
+[ -z "$URL_PREFIX" ] && URL_PREFIX='configurator' || :
+[ -z "$INSTANCE_ID" ] && INSTANCE_ID='i-00000000000000000' || :
 
+setup() {
     export FAIL_OUTPUT='{"code":403,"status":"Forbidden","title":"User name is limited to 255 bytes and may not include colon and hash symbols"}'
 
     mkdir -p "${BATS_TMPDIR}" || :
+    echo -n $INSTANCE_ID > ${BATS_TEST_DIRNAME}"/sandbox/INSTANCE_ID"
+}
+
+teardown() {
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/INSTANCE_ID"
 }
 
 get_input() {
     local USERNAME=$1
     local PASSWORD=$2
-    echo -n "{\"username\": \"${USERNAME}\", \"password\": \"${PASSWORD}\"}" >&1
-    echo "input: {\"username\": \"${USERNAME}\", \"password\": \"${PASSWORD}\"}" >&2
+    echo -n "{\"username\": \"${USERNAME}\", \"password\": \"${PASSWORD}\", \"instance\": \"${INSTANCE_ID}\"}" >&1
+    echo "input: {\"username\": \"${USERNAME}\", \"password\": \"${PASSWORD}\", \"instance\": \"${INSTANCE_ID}\"}" >&2
 }
 
 @test ": symbol in username" {
