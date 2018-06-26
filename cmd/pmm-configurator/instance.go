@@ -17,12 +17,11 @@ func checkInstanceHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	result, err := checkInstance(passedInstance.ID)
-	if result == "success" {
-		returnSuccess(w)
-	} else {
+	if result, err := checkInstance(passedInstance.ID); result != "success" {
 		returnError(w, req, http.StatusForbidden, result, err)
+		return
 	}
+	returnSuccess(w)
 }
 
 func checkInstance(instanceID string) (string, error) {
