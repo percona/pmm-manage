@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -49,7 +53,25 @@ func main() {
 	log.WithFields(log.Fields{
 		"address": c.ListenAddress,
 	}).Info("PMM Configurator is started")
-	log.Fatal(http.ListenAndServe(c.ListenAddress, router))
+
+	hs := &http.Server{Addr: c.ListenAddress, Handler: router}
+	gracefulStop(hs)
+	if err := hs.ListenAndServe(); err != http.ErrServerClosed {
+		log.Fatal(err)
+	}
+}
+
+func gracefulStop(hs *http.Server) {
+	var gracefulStop = make(chan os.Signal)
+	signal.Notify(gracefulStop, syscall.SIGINT)
+	signal.Notify(gracefulStop, syscall.SIGTERM)
+	go func() {
+		<-gracefulStop
+		if err := hs.Shutdown(context.Background()); err != nil {
+			log.Errorf("%v", err)
+		}
+		log.Info("Server stopped")
+	}()
 }
 
 func returnSuccess(w io.Writer) {
