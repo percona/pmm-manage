@@ -73,6 +73,14 @@ func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
 	// check for update
 	if cmdOutput, err := exec.Command("pmm-update-check").CombinedOutput(); err != nil {
 		from, to := parseOutput(string(cmdOutput))
+		releaseDateTo := fetchReleaseDate(to)
+		if len(releaseDateTo) > 0 {
+			to += " (" + releaseDateTo + ")"
+		}
+		releaseDateFrom := fetchReleaseDate(from)
+		if len(releaseDateFrom) > 0 {
+			from += " (" + releaseDateFrom + ")"
+		}
 		json.NewEncoder(w).Encode(updateResponce{ // nolint: errcheck
 			Code:   http.StatusOK,
 			Status: http.StatusText(http.StatusOK),
@@ -93,12 +101,12 @@ func parseOutput(output string) (string, string) {
 
 	match := fromVersionRegexp.FindStringSubmatch(output)
 	if len(match) == 2 {
-		from = fetchReleaseDate(match[1])
+		from = match[1]
 	}
 
 	match = toVersionRegexp.FindStringSubmatch(output)
 	if len(match) == 2 {
-		to = fetchReleaseDate(match[1])
+		to = match[1]
 	}
 
 	return from, to
@@ -107,20 +115,20 @@ func parseOutput(output string) (string, string) {
 func fetchReleaseDate(version string) string {
 	resp, err := http.Get(fmt.Sprintf(releaseNotesUrl, version))
 	if err != nil {
-		return version
+		return ""
 	}
 	defer resp.Body.Close() // nolint: errcheck
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return version
+		return ""
 	}
 
 	match := releaseNotesRegexp.FindStringSubmatch(string(body))
 	if len(match) != 2 {
-		return version
+		return ""
 	}
-	return version + " (" + match[1] + ")"
+	return match[1]
 }
 
 func readUpdateList() (map[string]string, error) {
@@ -170,7 +178,11 @@ func getCurrentVersionHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	match := currentVersionRegexp.FindSubmatch(fileContent)
 	if len(match) == 2 {
-		version := fetchReleaseDate(string(match[1]))
+		version := string(match[1])
+		releaseDate := fetchReleaseDate(version)
+		if len(releaseDate) > 0 {
+			version += " (" + releaseDate + ")"
+		}
 		json.NewEncoder(w).Encode(jsonResponce{ // nolint: errcheck
 			Code:   http.StatusOK,
 			Status: http.StatusText(http.StatusOK),
