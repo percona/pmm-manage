@@ -77,7 +77,12 @@ func (c *PMMConfig) setDefaultValues() {
 func (c *PMMConfig) parseConfig() {
 	// parseConfig() runs before setDefaultValues(), so it is needed to set default manually
 	if c.ConfigPath == "" {
-		c.ConfigPath = "/srv/update/pmm-manage.yml"
+		configVar := os.Getenv("TEST_CONFIG")
+		if len(configVar) > 0 {
+			c.ConfigPath = configVar
+		} else {
+			c.ConfigPath = "/srv/update/pmm-manage.yml"
+		}
 	}
 
 	configBytes, err := ioutil.ReadFile(c.ConfigPath)
