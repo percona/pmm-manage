@@ -11,6 +11,7 @@ matrix:
     - go: master
 
 install:
+  - sudo apt-get update -qq && sudo apt-get install -y -qq apache2-utils php5
   # ensure that vendor/ is in sync with code and Gopkg.*
   - curl https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 -L -o ~/dep && chmod +x ~/dep
   - rm -fr vendor/
@@ -18,4 +19,17 @@ install:
   - git diff --exit-code
 
 script:
-  go install -v ./cmd/...
+  - git status
+  - go build -v ./cmd/pmm-configure
+  - go build -v ./cmd/pmm-configurator
+  - ./tests/sandbox/start.sh >/dev/null 2>&1 &
+  - sleep 1
+  - bats --tap tests/*.bats
+
+notifications:
+  email: false
+  slack:
+    on_success: change
+    on_failure: always
+    rooms:
+      secure: QDKp28RJiVnst5gGKSKhVWvyIacYFLvl4eypPQoagrUm7VlQlGdmExH841OtURbqwNNsQoai2kP1XfxxSTPtTzmp6rMsBH4D4+cAfpqE2xgP/zQ1ctbA7B4hSAGu0FkAzyhiQb6HaGIeELaTiS5uTgwHn64BNgNtf8rC3mCIUanKlpAwPOejDOvldjkL3TzNkjnv9kujLQhiSSlldMownb0gNeSiH2HfYAZ9XT5wQj6rBEGI2Mk5xBzkEduLpHMe6r8Ocko3j3q3czrNrlrqgPiTzYIh+A1h6cSGu4xe6C3WmANVbHi/ieeM3YM+pT1ff5Mx0g75Kyi18zBCSWL4tBOeu+ciHPAPKFGx7sv5ivLNzoKJm/Fc3AsdkkAvSHErsrRCWdwemRveSdbNOkwDybNSso3ERRZ8YuWIP5rdKb8HIprVuMrvlrpjXi5p901Nabt7Pw4mgDBVJIIvZn8PJ4N/0T+RGO2bV38JlWIutLFHFcHcQ2QPZOiGPffxbtfmU7x7+J4QCHhA4ucYkwzxEb7UZcGpSxz3+zVoP25c480Z56KInkxIEi0LBEqw2s7MqsKpgho4KJIpCbciDhPN7MTm4aVeYjtJ0GgIbgKXuaLWMUMcYQ0yTHUHweGMHLSF/k7cdP8WSb4z1LtJqxKzye9IcejdacVPhdLzHaprW7w=

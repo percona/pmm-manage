@@ -43,6 +43,11 @@ func checkInstance(instanceID string) (string, error) {
 		if err != nil {
 			return "Cannot fetch instance meta-data", err
 		}
+
+		// ignore 404 error in non-AWS environments, like travis-ci
+		if resp.StatusCode == 404 {
+			return "success", nil
+		}
 		defer resp.Body.Close() // nolint: errcheck
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
