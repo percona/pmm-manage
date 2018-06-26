@@ -22,9 +22,16 @@ script:
   - git status
   - go build -v ./cmd/pmm-configure
   - go build -v ./cmd/pmm-configurator
-  - ./tests/sandbox/start.sh >/dev/null 2>&1 &
+  - go test -coverpkg="github.com/percona/pmm-manage/..." -c -tags testrunmain ./cmd/pmm-configurator
+  - |
+    sed -i "/ssh-key-path/assh-key-owner: $USER" tests/sandbox/config.yml
+  - PATH=$PATH:./tests/sandbox TEST_CONFIG=./tests/sandbox/config.yml ./pmm-configurator.test -test.run "^TestRunMain$" -test.coverprofile=coverage.txt >/dev/null 2>&1 &
   - sleep 1
   - bats --tap tests/*.bats
+  - killall -SIGINT pmm-configurator.test
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -X fix
 
 notifications:
   email: false
