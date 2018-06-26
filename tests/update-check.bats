@@ -153,3 +153,57 @@
 
     [[ "$output" = '{"code":200,"status":"OK","title":"A new PMM version is available.","from":"unknown","to":"unknown"}' ]]
 }
+
+@test "v2 check current version" {
+    if [ -z "${DEVELOPER_MODE}" ]; then
+        skip "can be checked only locally"
+    fi
+
+    echo '# v1.4.0' > ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+
+    run curl \
+        -s \
+        -X GET \
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v2/version"
+    echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+
+    [[ "$output" = '{"version":"1.4.0","release-date":"October 20, 2017"}' ]]
+}
+
+@test "v2 check current version, cannot parse release date" {
+    if [ -z "${DEVELOPER_MODE}" ]; then
+        skip "can be checked only locally"
+    fi
+
+    echo '# v1.4.777' > ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+
+    run curl \
+        -s \
+        -X GET \
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v2/version"
+    echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+
+    [[ "$output" = '{"version":"1.4.777"}' ]]
+}
+
+@test "v2 check current version - error" {
+    if [ -z "${DEVELOPER_MODE}" ]; then
+        skip "can be checked only locally"
+    fi
+
+    echo -n > ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+
+    run curl \
+        -s \
+        -X GET \
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v2/version"
+    echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+
+    [[ "$output" = '{"code":500,"status":"Internal Server Error","title":"Cannot parse current version"}' ]]
+}

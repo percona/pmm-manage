@@ -21,3 +21,9 @@ type updateResponce struct {
 	To     string `json:"to,omitempty"`
 	Step   string `json:"step,omitempty"`
 }
+
+type versionResponce struct {
+	Version       string `json:"version"`
+	ReleaseDate   string `json:"release-date,omitempty"`
+	DisableUpdate bool   `json:"disable-update,omitempty"`
+}

@@ -194,6 +194,25 @@ func getCurrentVersionHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func getCurrentVersionHandlerV2(w http.ResponseWriter, req *http.Request) {
+	fileContent, err := ioutil.ReadFile("/srv/update/main.yml")
+	if err != nil {
+		returnError(w, req, http.StatusInternalServerError, "Cannot read current version", err)
+		return
+	}
+	match := currentVersionRegexp.FindSubmatch(fileContent)
+	if len(match) == 2 {
+		version := string(match[1])
+		releaseDate := fetchReleaseDate(version)
+		json.NewEncoder(w).Encode(versionResponce{ // nolint: errcheck
+			Version:     version,
+			ReleaseDate: releaseDate,
+		})
+	} else {
+		returnError(w, req, http.StatusInternalServerError, "Cannot parse current version", err)
+	}
+}
+
 func returnLog(w http.ResponseWriter, req *http.Request, timestamp string, httpStatus int) {
 	updateList, err := readUpdateList()
 	if err != nil {
