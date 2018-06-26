@@ -95,6 +95,36 @@ func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
 	returnError(w, req, http.StatusNotFound, "Your PMM version is up-to-date.", nil)
 }
 
+func runCheckUpdateHandlerV2(w http.ResponseWriter, req *http.Request) {
+	pidFile := path.Join(c.UpdateDirPath, "pmm-update.pid")
+	if _, err := os.Stat(pidFile); err == nil {
+		timestamp, pid, err := getCurrentUpdate()
+		if err != nil {
+			returnError(w, req, http.StatusInternalServerError, "Cannot find update log", err)
+			return
+		}
+		if isPidAlive(pid) {
+			// update is going
+			returnLog(w, req, timestamp, http.StatusOK)
+			return
+		}
+	}
+
+	// check for update
+	if cmdOutput, err := exec.Command("pmm-update-check").CombinedOutput(); err != nil {
+		_, to := parseOutput(string(cmdOutput))
+		json.NewEncoder(w).Encode(versionResponce{ // nolint: errcheck
+			Version:       to,
+			ReleaseDate:   fetchReleaseDate(to),
+			DisableUpdate: isUpdateDisabled(),
+		})
+		return
+	}
+
+	// no update
+	returnError(w, req, http.StatusNotFound, "Your PMM version is up-to-date.", nil)
+}
+
 func parseOutput(output string) (string, string) {
 	from := "unknown"
 	to := "unknown"

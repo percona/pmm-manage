@@ -207,3 +207,139 @@
 
     [[ "$output" = '{"code":500,"status":"Internal Server Error","title":"Cannot parse current version"}' ]]
 }
+
+@test "v2 check update - up-to-date" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
+    echo '# v1.4.0' > ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+    echo '# v1.4.0' > ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    run curl \
+        -s \
+        -X GET \
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v2/check-update"
+    echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/main.yml" ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    [[ "$output" = '{"code":404,"status":"Not Found","title":"Your PMM version is up-to-date."}' ]]
+}
+
+@test "v2 check update - up-to-date, DISABLE_UPDATES" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
+    echo > ${BATS_TEST_DIRNAME}"/sandbox/DISABLE_UPDATES"
+    echo '# v1.4.0' > ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+    echo '# v1.4.0' > ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    run curl \
+        -s \
+        -X GET \
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v2/check-update"
+    echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/DISABLE_UPDATES" ${BATS_TEST_DIRNAME}"/sandbox/main.yml" ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    [[ "$output" = '{"code":404,"status":"Not Found","title":"Your PMM version is up-to-date."}' ]]
+}
+
+@test "v2 check update - new version available" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
+    echo '# v1.4.0' > ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+    echo '# v1.4.1' > ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    run curl \
+        -s \
+        -X GET \
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v2/check-update"
+    echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/main.yml" ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    [[ "$output" = '{"version":"1.4.1","release-date":"November 2, 2017"}' ]]
+}
+
+@test "v2 check update - new version available, DISABLE_UPDATES" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
+    echo > ${BATS_TEST_DIRNAME}"/sandbox/DISABLE_UPDATES"
+    echo '# v1.4.0' > ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+    echo '# v1.4.1' > ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    run curl \
+        -s \
+        -X GET \
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v2/check-update"
+    echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/DISABLE_UPDATES" ${BATS_TEST_DIRNAME}"/sandbox/main.yml" ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    [[ "$output" = '{"version":"1.4.1","release-date":"November 2, 2017","disable-update":true}' ]]
+}
+
+@test "v2 check update - known version available, cannot parse release date" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
+    echo '# v1.4.0' > ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+    echo '# v1.4.777' > ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    run curl \
+        -s \
+        -X GET \
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v2/check-update"
+    echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/main.yml" ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    [[ "$output" = '{"version":"1.4.777"}' ]]
+}
+
+@test "v2 check update - known version available, cannot parse release date, DISABLE_UPDATES" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
+    echo > ${BATS_TEST_DIRNAME}"/sandbox/DISABLE_UPDATES"
+    echo '# v1.4.0' > ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+    echo '# v1.4.777' > ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    run curl \
+        -s \
+        -X GET \
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v2/check-update"
+    echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/DISABLE_UPDATES" ${BATS_TEST_DIRNAME}"/sandbox/main.yml" ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    [[ "$output" = '{"version":"1.4.777","disable-update":true}' ]]
+}
+
+@test "v2 check update - unknown version available" {
+    if [ -n "${REMOTE}" ]; then
+        skip "can be checked only locally"
+    fi
+
+    echo '# old version' > ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
+    echo '# new version' > ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    run curl \
+        -s \
+        -X GET \
+        --insecure \
+        "${SUT}/${URL_PREFIX}/v2/check-update"
+    echo "$output" >&2
+    rm -rf ${BATS_TEST_DIRNAME}"/sandbox/main.yml" ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
+
+    [[ "$output" = '{"version":"unknown"}' ]]
+}
