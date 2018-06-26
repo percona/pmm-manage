@@ -3,7 +3,15 @@
 ROOT_DIR=$(pwd -P)
 PATH="$PATH:$(dirname $0)"
 
-exec $ROOT_DIR/pmm-configurator \
-    -ssh-key-owner $USER \
-    -config $ROOT_DIR/tests/sandbox/config.yml \
-    "$@"
+$(which gsed || which sed) -i "/ssh-key-path/assh-key-owner: $USER" ${ROOT_DIR}/tests/sandbox/config.yml
+
+pushd ${ROOT_DIR}
+    go test \
+        -coverpkg="github.com/percona/pmm-manage/..." \
+        -c -tags testrunmain -o ./pmm-configurator.test \
+        ./cmd/pmm-configurator
+popd
+
+exec ${ROOT_DIR}/pmm-configurator.test \
+    -test.run "^TestRunMain$" \
+    -test.coverprofile=coverage.txt
