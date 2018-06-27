@@ -169,7 +169,7 @@
     echo "$output" >&2
     rm -rf ${BATS_TEST_DIRNAME}"/sandbox/main.yml"
 
-    [[ "$output" = '{"version":"1.4.0","release-date":"October 20, 2017"}' ]]
+    [[ "$output" = '{"version":"1.4.0","release_date":"October 20, 2017"}' ]]
 }
 
 @test "v2 check current version, cannot parse release date" {
@@ -263,7 +263,7 @@
     echo "$output" >&2
     rm -rf ${BATS_TEST_DIRNAME}"/sandbox/main.yml" ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
 
-    [[ "$output" = '{"version":"1.4.1","release-date":"November 2, 2017"}' ]]
+    [[ "$output" = '{"version":"1.4.1","release_date":"November 2, 2017"}' ]]
 }
 
 @test "v2 check update - new version available, DISABLE_UPDATES" {
@@ -283,7 +283,7 @@
     echo "$output" >&2
     rm -rf ${BATS_TEST_DIRNAME}"/sandbox/DISABLE_UPDATES" ${BATS_TEST_DIRNAME}"/sandbox/main.yml" ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
 
-    [[ "$output" = '{"version":"1.4.1","release-date":"November 2, 2017","disable-update":true}' ]]
+    [[ "$output" = '{"version":"1.4.1","release_date":"November 2, 2017","disable_update":true}' ]]
 }
 
 @test "v2 check update - known version available, cannot parse release date" {
@@ -322,7 +322,7 @@
     echo "$output" >&2
     rm -rf ${BATS_TEST_DIRNAME}"/sandbox/DISABLE_UPDATES" ${BATS_TEST_DIRNAME}"/sandbox/main.yml" ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
 
-    [[ "$output" = '{"version":"1.4.777","disable-update":true}' ]]
+    [[ "$output" = '{"version":"1.4.777","disable_update":true}' ]]
 }
 
 @test "v2 check update - unknown version available" {
