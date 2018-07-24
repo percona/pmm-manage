@@ -42,6 +42,9 @@ func main() {
 	router.HandleFunc("/v1/updates/{timestamp}", getUpdateHandler).Methods("GET")
 	router.HandleFunc("/v1/updates/{timestamp}", deleteUpdateHandler).Methods("DELETE")
 
+	router.HandleFunc("/v2/version", getCurrentVersionHandlerV2).Methods("GET")
+	router.HandleFunc("/v2/check-update", runCheckUpdateHandlerV2).Methods("GET")
+
 	router.HandleFunc("/v1/users", getUserListHandler).Methods("GET")
 	router.HandleFunc("/v1/users", createUserHandler).Methods("POST")
 	router.HandleFunc("/v1/users/{username}", getUserHandler).Methods("GET")

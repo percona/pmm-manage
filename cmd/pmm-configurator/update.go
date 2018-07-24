@@ -73,6 +73,14 @@ func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
 	// check for update
 	if cmdOutput, err := exec.Command("pmm-update-check").CombinedOutput(); err != nil {
 		from, to := parseOutput(string(cmdOutput))
+		releaseDateTo := fetchReleaseDate(to)
+		if len(releaseDateTo) > 0 {
+			to += " (" + releaseDateTo + ")"
+		}
+		releaseDateFrom := fetchReleaseDate(from)
+		if len(releaseDateFrom) > 0 {
+			from += " (" + releaseDateFrom + ")"
+		}
 		json.NewEncoder(w).Encode(updateResponce{ // nolint: errcheck
 			Code:   http.StatusOK,
 			Status: http.StatusText(http.StatusOK),
@@ -87,18 +95,48 @@ func runCheckUpdateHandler(w http.ResponseWriter, req *http.Request) {
 	returnError(w, req, http.StatusNotFound, "Your PMM version is up-to-date.", nil)
 }
 
+func runCheckUpdateHandlerV2(w http.ResponseWriter, req *http.Request) {
+	pidFile := path.Join(c.UpdateDirPath, "pmm-update.pid")
+	if _, err := os.Stat(pidFile); err == nil {
+		timestamp, pid, err := getCurrentUpdate()
+		if err != nil {
+			returnError(w, req, http.StatusInternalServerError, "Cannot find update log", err)
+			return
+		}
+		if isPidAlive(pid) {
+			// update is going
+			returnLog(w, req, timestamp, http.StatusOK)
+			return
+		}
+	}
+
+	// check for update
+	if cmdOutput, err := exec.Command("pmm-update-check").CombinedOutput(); err != nil {
+		_, to := parseOutput(string(cmdOutput))
+		json.NewEncoder(w).Encode(versionResponce{ // nolint: errcheck
+			Version:       to,
+			ReleaseDate:   fetchReleaseDate(to),
+			DisableUpdate: isUpdateDisabled(),
+		})
+		return
+	}
+
+	// no update
+	returnError(w, req, http.StatusNotFound, "Your PMM version is up-to-date.", nil)
+}
+
 func parseOutput(output string) (string, string) {
 	from := "unknown"
 	to := "unknown"
 
 	match := fromVersionRegexp.FindStringSubmatch(output)
 	if len(match) == 2 {
-		from = fetchReleaseDate(match[1])
+		from = match[1]
 	}
 
 	match = toVersionRegexp.FindStringSubmatch(output)
 	if len(match) == 2 {
-		to = fetchReleaseDate(match[1])
+		to = match[1]
 	}
 
 	return from, to
@@ -107,20 +145,20 @@ func parseOutput(output string) (string, string) {
 func fetchReleaseDate(version string) string {
 	resp, err := http.Get(fmt.Sprintf(releaseNotesUrl, version))
 	if err != nil {
-		return version
+		return ""
 	}
 	defer resp.Body.Close() // nolint: errcheck
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return version
+		return ""
 	}
 
 	match := releaseNotesRegexp.FindStringSubmatch(string(body))
 	if len(match) != 2 {
-		return version
+		return ""
 	}
-	return version + " (" + match[1] + ")"
+	return match[1]
 }
 
 func readUpdateList() (map[string]string, error) {
@@ -170,12 +208,35 @@ func getCurrentVersionHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	match := currentVersionRegexp.FindSubmatch(fileContent)
 	if len(match) == 2 {
-		version := fetchReleaseDate(string(match[1]))
+		version := string(match[1])
+		releaseDate := fetchReleaseDate(version)
+		if len(releaseDate) > 0 {
+			version += " (" + releaseDate + ")"
+		}
 		json.NewEncoder(w).Encode(jsonResponce{ // nolint: errcheck
 			Code:   http.StatusOK,
 			Status: http.StatusText(http.StatusOK),
 			Title:  version,
 			Detail: version,
+		})
+	} else {
+		returnError(w, req, http.StatusInternalServerError, "Cannot parse current version", err)
+	}
+}
+
+func getCurrentVersionHandlerV2(w http.ResponseWriter, req *http.Request) {
+	fileContent, err := ioutil.ReadFile("/srv/update/main.yml")
+	if err != nil {
+		returnError(w, req, http.StatusInternalServerError, "Cannot read current version", err)
+		return
+	}
+	match := currentVersionRegexp.FindSubmatch(fileContent)
+	if len(match) == 2 {
+		version := string(match[1])
+		releaseDate := fetchReleaseDate(version)
+		json.NewEncoder(w).Encode(versionResponce{ // nolint: errcheck
+			Version:     version,
+			ReleaseDate: releaseDate,
 		})
 	} else {
 		returnError(w, req, http.StatusInternalServerError, "Cannot parse current version", err)
