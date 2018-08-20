@@ -151,7 +151,7 @@
     echo "$output" >&2
     rm -rf ${BATS_TEST_DIRNAME}"/sandbox/main.yml" ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
 
-    [[ "$output" = '{"code":200,"status":"OK","title":"A new PMM version is available.","from":"unknown","to":"unknown"}' ]]
+    [[ "$output" = '{"code":200,"status":"OK","title":"A new PMM version is available.","from":"current","to":"latest"}' ]]
 }
 
 @test "v2 check current version" {
@@ -341,5 +341,5 @@
     echo "$output" >&2
     rm -rf ${BATS_TEST_DIRNAME}"/sandbox/main.yml" ${BATS_TEST_DIRNAME}"/sandbox/new.yml"
 
-    [[ "$output" = '{"version":"unknown"}' ]]
+    [[ "$output" = '{"version":"latest"}' ]]
 }
