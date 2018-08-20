@@ -126,8 +126,8 @@ func runCheckUpdateHandlerV2(w http.ResponseWriter, req *http.Request) {
 }
 
 func parseOutput(output string) (string, string) {
-	from := "unknown"
-	to := "unknown"
+	from := "current"
+	to := "latest"
 
 	match := fromVersionRegexp.FindStringSubmatch(output)
 	if len(match) == 2 {
