@@ -9,12 +9,13 @@ import (
 
 var credentialsRegexp = regexp.MustCompile(`(username|password|job_name): ([^\s]+)`)
 var replaceNeeded = map[string]bool{
-	"linux":    true,
-	"proxysql": true,
-	"mongodb":  true,
-	"mysql-hr": true,
-	"mysql-lr": true,
-	"mysql-mr": true,
+	"linux":      true,
+	"proxysql":   true,
+	"mongodb":    true,
+	"postgresql": true,
+	"mysql-hr":   true,
+	"mysql-lr":   true,
+	"mysql-mr":   true,
 }
 
 // TODO: should be fully reworked, implemented as very quick workaround for v1.1.0
