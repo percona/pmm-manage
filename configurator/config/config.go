@@ -49,8 +49,6 @@ func ParseConfig() (c PMMConfig) {
 	}
 
 	flag.Parse()
-	c.parseConfig()
-	flag.Parse() // command line should overide config
 	c.setDefaultValues()
 	c.setLogger()
 	c.validateValues()
@@ -71,40 +69,6 @@ func (c *PMMConfig) setDefaultValues() {
 		if curValue == "" {
 			v.Field(i).SetString(defValue)
 		}
-	}
-}
-
-func (c *PMMConfig) parseConfig() {
-	// parseConfig() runs before setDefaultValues(), so it is needed to set default manually
-	if c.ConfigPath == "" {
-		configVar := os.Getenv("TEST_CONFIG")
-		if len(configVar) > 0 {
-			c.ConfigPath = configVar
-		} else {
-			c.ConfigPath = "/srv/update/pmm-manage.yml"
-		}
-	}
-
-	configBytes, err := ioutil.ReadFile(c.ConfigPath)
-	if os.IsNotExist(err) {
-		// ignore config file is not exists
-		return
-	}
-	if err != nil {
-		log.WithFields(log.Fields{
-			"file":  c.ConfigPath,
-			"error": err,
-		}).Error("Cannot read config file")
-		return
-	}
-
-	err = yaml.Unmarshal(configBytes, &c)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"file":  c.ConfigPath,
-			"error": err,
-		}).Error("Cannot parse config file")
-		return
 	}
 }
 
