@@ -1,12 +1,12 @@
 dist: trusty
-sudo: required
 language: go
+os: linux
 
 go:
   - 1.12.x
   - master
 
-matrix:
+jobs:
   allow_failures:
     - go: master
 
@@ -39,4 +39,4 @@ notifications:
     on_success: change
     on_failure: always
     rooms:
-      secure: QDKp28RJiVnst5gGKSKhVWvyIacYFLvl4eypPQoagrUm7VlQlGdmExH841OtURbqwNNsQoai2kP1XfxxSTPtTzmp6rMsBH4D4+cAfpqE2xgP/zQ1ctbA7B4hSAGu0FkAzyhiQb6HaGIeELaTiS5uTgwHn64BNgNtf8rC3mCIUanKlpAwPOejDOvldjkL3TzNkjnv9kujLQhiSSlldMownb0gNeSiH2HfYAZ9XT5wQj6rBEGI2Mk5xBzkEduLpHMe6r8Ocko3j3q3czrNrlrqgPiTzYIh+A1h6cSGu4xe6C3WmANVbHi/ieeM3YM+pT1ff5Mx0g75Kyi18zBCSWL4tBOeu+ciHPAPKFGx7sv5ivLNzoKJm/Fc3AsdkkAvSHErsrRCWdwemRveSdbNOkwDybNSso3ERRZ8YuWIP5rdKb8HIprVuMrvlrpjXi5p901Nabt7Pw4mgDBVJIIvZn8PJ4N/0T+RGO2bV38JlWIutLFHFcHcQ2QPZOiGPffxbtfmU7x7+J4QCHhA4ucYkwzxEb7UZcGpSxz3+zVoP25c480Z56KInkxIEi0LBEqw2s7MqsKpgho4KJIpCbciDhPN7MTm4aVeYjtJ0GgIbgKXuaLWMUMcYQ0yTHUHweGMHLSF/k7cdP8WSb4z1LtJqxKzye9IcejdacVPhdLzHaprW7w=
+      - secure: i9S5flGm9ZTlxJrbsdfSUoHpTKE0WBIf0xK1hCu5e0N/Vi0BtPjgXuoYZe/q9OkuejF/SG5GqoO6BH2CV+a9SLUA3LMCDuwgH/v83p2ML3CwQJd+v2o9vZG1oNG0gdyatUbdxBKBH0QwQ5QUh14FYyMGI8CEW5B+wv44yf9pHx8F+xJY3tGbxPqUhdXgMbC6SpvoLTp2RNwNCFWN5KoJoGRCtyc5Jigbw8PAfRUvSMnU9G/ZdHom6/dlvkEir1EzIlbPwv+Xq9BAfy/Nn0ra7sFlKDTJyc7HWQbzCaMlQBbP5QAP9T3LagHtsWAhw6xyRdDWrRGkaAS4rnmzbW2qDPL1Ss4nDIWjaqbpYVgHGI8M3RxQjyw7ccD40rPVVyF7nlhFByP/bcURVNZrNbKgezvM8dJVPDndVBHdaP3mHcL/IpR/JF8GYyO3tuclC9uUzCcQtyMkpbJ9/ehFSfTlz3ztka4NPeL9QB6pDUDQJa/DjMuhmfQILB9g77UEA8IR+S4sW2GFeHwZ/lwqKWL020X32zkMVEU+3k8uZ+MoR8u2ILg+Alq2FUbT61vbspcn/YyMmNJr11Zd+aXoE67Km4aZziHWOT8Pra7EMaKtpLxYIx4T9V8jgUD2jZetW8L9EQASjzsbIct4YnG9YVkAMIUi75YnYxLAzSjDlBR8+j0=
